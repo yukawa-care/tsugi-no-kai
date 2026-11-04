@@ -1,0 +1,21 @@
+# 次の回まで
+# 置くときに、記録の入れ物（D1）と音声の置き場所（KV）は自動で用意されます。
+# 合言葉は、置いたあと最初に開いた画面「はじめの設定」で決めます。
+name = "tsugi-no-kai"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+# アドレス（https://名前.〇〇.workers.dev）を有効にする
+workers_dev = true
+
+[assets]
+directory = "./public"
+
+[vars]
+COURSE_NAME = "講座"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "tsugi-no-kai"
+
+[[kv_namespaces]]
+binding = "AUDIO"
