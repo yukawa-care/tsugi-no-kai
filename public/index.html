@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#22423a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="次の回まで">
+<title>次の回まで</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&family=BIZ+UDPGothic:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* 黒板と白墨。講習の教室をスマホに持ち帰る。1カラム・下にタブ */
+  --bg:#e9eee9;
+  --surface:#f8faf7;
+  --ink:#1d2f29;
+  --muted:#5b6d66;
+  --line:#cfd8d2;
+  --board:#22423a;
+  --board-ink:#eef3ea;
+  --chalk:#e8b923;
+  --ok:#2f7d55;
+  --warn:#b4532a;
+  --font-display:"Klee One","Hiragino Maru Gothic ProN",serif;
+  --font-body:"BIZ UDPGothic","Hiragino Sans","Noto Sans JP",sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#111916;--surface:#18231f;--ink:#e3ebe6;--muted:#93a49c;--line:#2b3a34;
+    --board:#1f3d35;--board-ink:#eef3ea;--chalk:#f0c84a;--ok:#5cbf8a;--warn:#e08a5f;color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111916;--surface:#18231f;--ink:#e3ebe6;--muted:#93a49c;--line:#2b3a34;
+  --board:#1f3d35;--board-ink:#eef3ea;--chalk:#f0c84a;--ok:#5cbf8a;--warn:#e08a5f;color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.75;-webkit-text-size-adjust:100%}
+.app{max-width:480px;margin:0 auto;min-height:100%;display:flex;flex-direction:column}
+header.top{padding:14px 16px 6px;display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding-top:max(14px,env(safe-area-inset-top))}
+header.top h1{font-family:var(--font-display);font-weight:600;font-size:22px;margin:0;letter-spacing:.04em;white-space:nowrap}
+header.top .course{font-size:12px;color:var(--muted);text-align:right}
+.sample{display:inline-block;font-size:11px;border:1px solid var(--muted);color:var(--muted);border-radius:3px;padding:0 5px;margin-left:4px;vertical-align:2px;white-space:nowrap}
+.switch{font-size:12px;color:var(--muted);text-decoration:underline;background:none;border:none;min-height:auto;padding:0;cursor:pointer}
+main{flex:1;padding:8px 16px 104px;display:flex;flex-direction:column;gap:18px}
+h2{font-family:var(--font-display);font-weight:600;font-size:19px;margin:0 0 8px;text-wrap:balance}
+h3{font-size:15px;margin:0 0 6px}
+p{margin:0 0 10px}
+.muted{color:var(--muted);font-size:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+.board{background:var(--board);color:var(--board-ink);border-radius:6px;padding:18px 18px 16px;box-shadow:inset 0 0 0 6px rgba(0,0,0,.12)}
+.board .label{font-size:13px;opacity:.8}
+.board .count{font-family:var(--font-display);font-size:54px;line-height:1.1;font-variant-numeric:tabular-nums}
+.board .count small{font-size:20px;margin-left:4px}
+.board .next-title{font-family:var(--font-display);font-size:20px;margin-top:6px}
+.board .when{font-size:14px;opacity:.85}
+.board .chalkline{height:3px;width:72px;background:var(--chalk);border-radius:2px;margin:10px 0 8px;opacity:.9}
+.board .prep{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
+
+button,.btn{font:inherit;font-size:15px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:9px 14px;cursor:pointer;min-height:44px}
+button:disabled{opacity:.6;cursor:default}
+button:focus-visible,a:focus-visible,textarea:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--chalk);outline-offset:2px}
+.btn-chalk{background:var(--chalk);border-color:var(--chalk);color:#1d2f29;font-weight:700}
+.btn-board{background:var(--board);border-color:var(--board);color:var(--board-ink)}
+.btn-ghost-board{background:transparent;color:var(--board-ink);border-color:rgba(238,243,234,.45)}
+.btn-quiet{background:none;border-color:transparent;color:var(--muted);text-decoration:underline;padding:6px 4px;min-height:36px}
+.btn-danger{color:var(--warn);border-color:var(--warn);background:none}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:16px}
+.panel.ask-share{border-color:var(--chalk);box-shadow:inset 4px 0 0 var(--chalk)}
+
+.flow{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.flow li{display:grid;grid-template-columns:22px 1fr;gap:10px;padding:8px 0;position:relative}
+.flow li:not(:last-child)::before{content:"";position:absolute;left:10px;top:28px;bottom:-8px;width:2px;background:var(--line)}
+.dot{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);background:var(--surface);margin-top:3px;display:grid;place-items:center;font-size:12px;color:#fff}
+.done .dot{background:var(--ok);border-color:var(--ok)}
+.today .dot{border-color:var(--chalk);background:var(--chalk);color:#1d2f29}
+.flow .when{font-size:13px;color:var(--muted)}
+.flow .state{font-size:12px;font-weight:700;margin-left:6px}
+.done .state{color:var(--ok)}
+.today .state{color:#1d2f29;background:var(--chalk);padding:0 6px;border-radius:3px}
+
+.lessons{display:flex;flex-direction:column;gap:10px}
+.lesson-row{display:grid;grid-template-columns:52px 1fr auto;gap:12px;align-items:center;text-align:left;width:100%;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px}
+.lesson-row .no{font-family:var(--font-display);font-size:26px;text-align:center;line-height:1}
+.lesson-row .no small{display:block;font-size:11px;color:var(--muted);font-family:var(--font-body)}
+.lesson-row .t{font-weight:700}
+.chip{font-size:12px;padding:2px 8px;border-radius:999px;border:1px solid var(--line);white-space:nowrap}
+.chip.seen,.chip.pub{border-color:var(--ok);color:var(--ok)}
+.chip.next{background:var(--chalk);border-color:var(--chalk);color:#1d2f29;font-weight:700}
+.chip.draft{border-color:var(--warn);color:var(--warn)}
+
+.three{list-style:none;margin:0;padding:0;counter-reset:n;display:flex;flex-direction:column;gap:8px}
+.three li{counter-increment:n;display:grid;grid-template-columns:30px 1fr;gap:8px;font-size:17px}
+.three li::before{content:counter(n);font-family:var(--font-display);font-size:22px;color:var(--board);line-height:1.4}
+:root[data-theme="dark"] .three li::before{color:var(--chalk)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .three li::before{color:var(--chalk)}}
+.three li span{background:linear-gradient(transparent 62%, color-mix(in srgb,var(--chalk) 45%,transparent) 62%)}
+.media{border:2px dashed var(--line);border-radius:6px;padding:18px;text-align:center;color:var(--muted);font-size:14px}
+.video{position:relative;padding-top:56.25%;border-radius:6px;overflow:hidden;background:#000}
+.video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+audio{width:100%}
+.audio{display:flex;align-items:center;gap:12px}
+.audio .play{width:48px;height:48px;border-radius:50%;background:var(--board);color:var(--board-ink);border:none;display:grid;place-items:center;flex:none;padding:0}
+.tabs-inline{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-bottom:12px;overflow-x:auto}
+.tabs-inline button{border:none;background:none;border-bottom:3px solid transparent;border-radius:0;padding:8px 10px;min-height:40px;color:var(--muted)}
+.tabs-inline button[aria-selected="true"]{border-bottom-color:var(--chalk);color:var(--ink);font-weight:700}
+dl.terms{margin:0;display:flex;flex-direction:column;gap:10px}
+dl.terms dt{font-weight:700}
+dl.terms dd{margin:0;color:var(--muted);font-size:15px}
+
+.q{display:flex;flex-direction:column;gap:8px}
+.q .stem{font-weight:700}
+.q .opt{text-align:left;width:100%}
+.q .opt.right{border-color:var(--ok);box-shadow:inset 4px 0 0 var(--ok);opacity:1}
+.q .opt.wrong{opacity:.55;text-decoration:line-through}
+.q .exp{font-size:14px;border-left:3px solid var(--chalk);padding:6px 10px;background:color-mix(in srgb,var(--chalk) 10%,transparent)}
+.qs{display:flex;flex-direction:column;gap:22px}
+
+.field{display:flex;flex-direction:column;gap:4px;font-size:14px;color:var(--muted)}
+input[type=text],input[type=password],input[type=url],input[type=number],input[type=datetime-local],select,textarea{width:100%;font:inherit;font-size:16px;padding:10px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+textarea{min-height:96px;resize:vertical}
+textarea.code{font-family:ui-monospace,Menlo,monospace;font-size:13px;min-height:180px}
+.check{display:flex;gap:8px;align-items:center;font-size:15px}
+.check input{width:20px;height:20px}
+.form{display:flex;flex-direction:column;gap:12px}
+.notes{list-style:none;padding:0;margin:10px 0 0;display:flex;flex-direction:column;gap:8px}
+.notes li{border-left:3px solid var(--line);padding:4px 10px;font-size:15px}
+.notes li .who{font-size:12px;color:var(--muted)}
+.notice{font-size:14px;padding:10px 12px;border-radius:6px;background:color-mix(in srgb,var(--ok) 12%,transparent);border:1px solid color-mix(in srgb,var(--ok) 40%,transparent)}
+.error{font-size:14px;padding:10px 12px;border-radius:6px;background:color-mix(in srgb,var(--warn) 12%,transparent);border:1px solid color-mix(in srgb,var(--warn) 45%,transparent)}
+.qa{display:flex;flex-direction:column;gap:6px;padding:8px 0;border-bottom:1px solid var(--line)}
+.qa:last-child{border-bottom:none}
+.qa .qq{font-weight:700}
+.qa .qq::before{content:"問 ";font-family:var(--font-display);color:var(--muted)}
+.qa .aa::before{content:"答 ";font-family:var(--font-display);color:var(--muted)}
+
+.tally-board{background:var(--board);color:var(--board-ink);border-radius:6px;padding:16px 18px;box-shadow:inset 0 0 0 6px rgba(0,0,0,.12)}
+.tally-board .big{font-family:var(--font-display);font-size:40px;line-height:1.1;font-variant-numeric:tabular-nums}
+.tally-board .big small{font-size:16px;margin-left:4px}
+.tally{display:flex;flex-wrap:wrap;gap:10px 14px;margin-top:10px;min-height:40px}
+.tally svg{width:40px;height:40px}
+.tally svg path{stroke:var(--board-ink);stroke-width:3;stroke-linecap:round;fill:none;opacity:.92}
+.tally svg path.new{stroke:var(--chalk)}
+.ready{display:flex;flex-direction:column;gap:8px}
+.ready .meter{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.ready .meter span{height:10px;border-radius:5px;background:var(--line)}
+.ready .meter span.on{background:var(--ok)}
+.ready ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.ready li{display:flex;gap:8px;align-items:flex-start;font-size:15px}
+.ready li .box{width:20px;height:20px;border-radius:4px;border:2px solid var(--line);display:grid;place-items:center;font-size:12px;flex:none;margin-top:4px}
+.ready li.on .box{background:var(--ok);border-color:var(--ok);color:#fff}
+.ready li.on .lbl{color:var(--muted);text-decoration:line-through}
+.kinds,.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tiles{grid-template-columns:repeat(2,1fr)}
+.kinds div,.tiles div{border:1px solid var(--line);border-radius:6px;padding:8px;text-align:center}
+.kinds b,.tiles b{display:block;font-family:var(--font-display);font-size:26px;font-weight:600;font-variant-numeric:tabular-nums}
+.kinds span,.tiles span{font-size:12px;color:var(--muted)}
+.tiles div.warn b{color:var(--warn)}
+.weeks{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.weeks div{border:1px solid var(--line);border-radius:6px;padding:6px;text-align:center;font-size:12px;color:var(--muted)}
+.weeks div.on{border-color:var(--chalk);background:color-mix(in srgb,var(--chalk) 18%,transparent);color:var(--ink)}
+.weeks div b{display:block;font-size:18px;font-family:var(--font-display)}
+.history{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.history li{display:grid;grid-template-columns:54px 1fr;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:15px}
+.history li:last-child{border-bottom:none}
+.history .d{color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
+.word{border-left:3px solid var(--chalk);padding:8px 12px;background:color-mix(in srgb,var(--chalk) 10%,transparent);font-family:var(--font-display);font-size:16px}
+.word .by{display:block;font-family:var(--font-body);font-size:12px;color:var(--muted);margin-top:4px}
+.everyone{display:flex;align-items:center;gap:12px}
+.everyone .dots{display:flex;flex-wrap:wrap;gap:4px;max-width:150px;flex:none}
+.everyone .dots i{width:12px;height:12px;border-radius:50%;background:var(--line);display:block}
+.everyone .dots i.on{background:var(--ok)}
+.people{width:100%;border-collapse:collapse;font-size:15px}
+.people th,.people td{text-align:left;padding:6px 4px;border-bottom:1px solid var(--line)}
+.people th{font-size:12px;color:var(--muted);font-weight:400}
+.people td.n{font-variant-numeric:tabular-nums}
+.letter{display:flex;flex-direction:column;gap:6px;padding:10px 0;border-bottom:1px solid var(--line)}
+.letter:last-child{border-bottom:none}
+.letter pre{white-space:pre-wrap;font:inherit;font-size:15px;margin:0;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:10px}
+.preview{font-size:14px;border:1px dashed var(--line);border-radius:6px;padding:10px}
+.toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%);background:var(--board);color:var(--board-ink);padding:10px 16px;border-radius:6px;font-size:14px;max-width:90%;box-shadow:0 4px 14px rgba(0,0,0,.2);z-index:5}
+.toast b{color:var(--chalk);font-family:var(--font-display);font-size:16px}
+.login{max-width:360px;margin:6vh auto 0;display:flex;flex-direction:column;gap:14px}
+.login .board{text-align:center}
+
+nav.bottom{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+nav.bottom .inner{max-width:480px;margin:0 auto;display:grid;grid-auto-flow:column;grid-auto-columns:1fr}
+nav.bottom button{border:none;border-radius:0;background:none;min-height:60px;padding:6px 2px;white-space:nowrap;font-size:12px;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+nav.bottom button svg{width:22px;height:22px}
+nav.bottom button[aria-current="page"]{color:var(--ink);font-weight:700;box-shadow:inset 0 3px 0 var(--chalk)}
+.back{align-self:flex-start;min-height:36px;padding:4px 10px;font-size:14px}
+@media (prefers-reduced-motion:no-preference){.view{animation:in .18s ease-out}@keyframes in{from{transform:translateY(4px)}to{transform:none}}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <h1>次の回まで</h1>
+    <div class="course" id="courseName"></div>
+  </header>
+  <main id="view" class="view" tabindex="-1"><p class="muted">読み込んでいます…</p></main>
+  <nav class="bottom" id="nav" aria-label="画面の切り替え" hidden><div class="inner" id="navInner"></div></nav>
+</div>
+
+<script>
+"use strict";
+/* ============================================================
+   次の回まで
+   サーバー（Cloudflare）があれば本番、なければ見本で動く
+   ============================================================ */
+const DAY = 86400000;
+const KIND = { attend: "講習に出た", review: "回を見返した", listen: "おさらい音声を聞いた",
+  correct: "問題に正解した", try: "やってみたを残した", ask: "質問を送った" };
+const WORD_LABEL = { firstTry: "初めてのやってみた", tally5: "一つ目の正（5画）", ready: "準備ととのった",
+  tally10: "二つ目の正（10画）", idle: "7日動きがないとき" };
+
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const wd = "日月火水木金土";
+const fmt = d => { d = new Date(d); return `${d.getMonth()+1}月${d.getDate()}日（${wd[d.getDay()]}）${d.getHours()}:${String(d.getMinutes()).padStart(2,"0")}`; };
+const md = d => { d = new Date(d); return `${d.getMonth()+1}/${d.getDate()}`; };
+const daysUntil = d => Math.max(0, Math.ceil((new Date(d) - Date.now()) / DAY));
+const ymd = t => { const d = new Date(t); return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`; };
+function load(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } }
+function save(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+function drop(k){ try{ localStorage.removeItem(k); }catch(e){} }
+const toLocalInput = iso => { if (!iso) return ""; const d = new Date(iso); const p = n => String(n).padStart(2,"0");
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`; };
+const fromLocalInput = v => v ? new Date(v).toISOString() : "";
+
+/* ---------- 見本（サーバーがないとき） ---------- */
+const SAMPLE_TASK = "自院の案内文を一つ用意し、AIに読みやすく直してもらう（患者さんの名前は入れない）";
+function makeDemo(){
+  const now = new Date();
+  const first = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 4, 20, 0);
+  const t0 = first.getTime();
+  return {
+    courseName: "施術者のためのAI入門",
+    words: { firstTry: "試したことが、いちばんの復習です。", tally5: "一つ目の「正」。いい調子です。",
+      ready: "準備ととのいました。当日は、持ってきたものから始めましょう。", tally10: "二つ目の「正」。ここまで来たら、もう習慣です。",
+      idle: "見返すのは1分の音声だけでも大丈夫です。" },
+    lessons: [
+      { no: 1, title: "AIで何ができるか", date: first.toISOString(), published: true, video: "", audio: false, data: {
+        three: ["AIは下書き係。仕上げは自分の目で", "患者さんの名前や症状はAIに入れない", "頼むときは「誰に・何を・どのくらい」"],
+        text: ["AIは、頼めばすぐに文章の下書きを出してくれます。ただ、出てきたものは下書きです。院の名前で外に出す前に、必ず自分で読んで直します。",
+          "入れてはいけないものがあります。患者さんの名前、症状、写真。院の外に出してはいけない情報は、AIにも入れません。",
+          "頼み方のこつは三つです。誰に向けた文か、何を書いてほしいか、どのくらいの長さか。この三つが書いてあるだけで、下書きはぐっと使えるものになります。"],
+        terms: [["プロンプト", "AIへの頼み文のこと。普段の言葉で書いてかまいません"], ["下書き", "AIが出した文。そのまま使わず、自分で直す前提のもの"], ["チャット", "AIと文字でやりとりする画面"]],
+        quiz: [
+          { stem: "AIに入れてはいけないものはどれ？", opts: ["院の営業時間", "患者さんの名前と症状", "ブログの題名の案"], a: 1, exp: "院の外に出せない情報は、AIにも入れません。営業時間や題名の案は入れて大丈夫です。" },
+          { stem: "頼み方で大事な三つは？", opts: ["誰に・何を・どのくらい", "丁寧語・敬語・謙譲語", "長く・細かく・何度も"], a: 0, exp: "誰に向けた文か、何を書くか、どのくらいの長さか。これだけで下書きが変わります。" },
+          { stem: "AIが書いた文章はどうする？", opts: ["そのまま出す", "自分で読んで直してから出す", "使わない"], a: 1, exp: "下書きとして使い、自分の言葉に直してから出します。表現の点検には、ことば整えのような道具も使えます。" }],
+        task: SAMPLE_TASK } },
+      { no: 2, title: "院の文章をAIと直す", date: new Date(t0 + 14*DAY).toISOString(), published: false, data: null, video: "", audio: false },
+      { no: 3, title: "小さな道具を一つ作る", date: new Date(t0 + 28*DAY).toISOString(), published: false, data: null, video: "", audio: false }
+    ],
+    log: [
+      { k: "attend", key: "1", t: t0 + 3600000 },
+      { k: "review", key: "1", t: t0 + 7200000 },
+      { k: "listen", key: "1", t: t0 + 3*DAY },
+      { k: "correct", key: "1-0", t: now.getTime() - DAY }
+    ],
+    myTries: [],
+    others: [
+      { text: "休診のお知らせをAIに下書きしてもらい、自分で直して出しました。10分で済みました。", t: now.getTime() - 2*DAY },
+      { text: "頼み文に「70代の方向けに」と足したら、言葉がやわらかくなりました。", t: now.getTime() - DAY }],
+    answers: [{ lesson: 1, q: "無料で使えるAIでも大丈夫ですか？", a: "第1回の内容なら無料の範囲でも試せます。使える回数などは変わることがあるので、各サービスの公式で確かめてください。", t: now.getTime() - DAY }],
+    questions: [{ id: 1, lesson: 1, text: "AIが書いた文が自分の言葉に聞こえません。どこから直せばいいですか？", t: now.getTime() - 3600000 }],
+    everyone: { total: 12, tried: 7 },
+    teacherName: "講師", channel: "LINE",
+    audience: "施術者（鍼灸師・あん摩マッサージ指圧師など）。AIやパソコンが得意でない人が多い",
+    ngWords: "治る、治す、治癒、完治、臨床、治療家、必ず、絶対、診断",
+    me: { name: "見本の参加者", showTeacher: false, askedShare: false },
+    shared: [{ name: "参加者A（見本）", strokes: 9, ready: 3, last: now.getTime() - DAY }, { name: "参加者B（見本）", strokes: 3, ready: 1, last: now.getTime() - 8*DAY }],
+    names: ["参加者A（見本）", "参加者B（見本）", "見本の参加者"],
+    memberCode: "sanka-mihon1"
+  };
+}
+let demo = null;
+
+/* ---------- 回の状態 ---------- */
+function withStatus(lessons){
+  const now = Date.now(); let nextFound = false;
+  return lessons.slice().sort((a,b) => a.no - b.no).map(l => {
+    const t = Date.parse(l.date); let status;
+    if (t <= now) status = l.published && l.data ? "done" : "prep";
+    else if (!nextFound) { status = "next"; nextFound = true; } else status = "later";
+    return { ...l, status };
+  });
+}
+
+/* ---------- サーバーとのやりとり ---------- */
+let MODE = "demo", ROLE = null, TOKEN = null, NEEDS_SETUP = false;
+async function api(path, opts = {}){
+  const headers = { ...(opts.headers || {}) };
+  if (TOKEN) headers.authorization = "Bearer " + TOKEN;
+  let body = opts.body;
+  if (body && !(body instanceof Blob) && typeof body !== "string") { body = JSON.stringify(body); headers["content-type"] = "application/json"; }
+  const res = await fetch(path, { method: opts.method || "GET", headers, body });
+  let data = {}; try { data = await res.json(); } catch(e) {}
+  if (res.status === 401 && path !== "/api/login") { logout(true); throw new Error(data.error || "もう一度入ってください"); }
+  if (!res.ok) throw new Error(data.error || "うまくいきませんでした（" + res.status + "）");
+  return data;
+}
+async function detect(){
+  try {
+    const ctrl = new AbortController(); setTimeout(() => ctrl.abort(), 3500);
+    const r = await fetch("/api/ping", { signal: ctrl.signal });
+    if (r.ok) { const d = await r.json(); if (d.ok) { NEEDS_SETUP = !!d.setup; return "api"; } }
+  } catch(e) {}
+  return "demo";
+}
+
+/* ---------- 参加者の状態 ---------- */
+let S = null;      // 参加者の画面のもと
+let TS = null;     // 講師の画面のもと
+async function loadMember(){
+  if (MODE === "api") { S = await api("/api/state"); }
+  else {
+    const ls = withStatus(demo.lessons);
+    S = { courseName: demo.courseName, words: demo.words, teacherName: demo.teacherName, channel: demo.channel, me: demo.me, log: demo.log, myTries: demo.myTries,
+      others: demo.others, answers: demo.answers, everyone: demo.everyone,
+      lessons: ls.map(l => ({ no: l.no, title: l.title, date: l.date, status: l.status,
+        ...(l.status === "done" ? { data: l.data, video: l.video, audio: l.audio } : {}) })) };
+  }
+}
+async function loadTeacher(){
+  if (MODE === "api") { TS = await api("/api/t/state"); return; }
+  const ls = withStatus(demo.lessons);
+  const ld = [...ls].reverse().find(l => l.status === "done");
+  const r = readinessOf(demo.log, ld ? Date.parse(ld.date) : 0);
+  TS = { courseName: demo.courseName, words: demo.words, lessons: ls,
+    teacherName: demo.teacherName, audience: demo.audience, ngWords: demo.ngWords, channel: demo.channel, memberCode: demo.memberCode,
+    stats: { members: 12, triedWeek: 7, ready: 4 + (r.every(Boolean) ? 1 : 0), idle: 3 },
+    shared: demo.shared, names: demo.names, questions: demo.questions, answers: demo.answers.map((a, i) => ({ ...a, id: i + 1 })) };
+}
+const lastDone = () => [...S.lessons].reverse().find(l => l.status === "done");
+const nextLesson = () => S.lessons.find(l => l.status === "next");
+function readinessOf(log, since){
+  const after = log.filter(e => e.t >= since);
+  return [after.some(e => e.k === "review" || e.k === "listen"), after.some(e => e.k === "correct"), after.some(e => e.k === "try")];
+}
+function readiness(){
+  const ld = lastDone(); if (!ld) return null;
+  const on = readinessOf(S.log, Date.parse(ld.date));
+  const task = ld.data && ld.data.task;
+  const items = [
+    { on: on[0], lbl: "前の回を見返す（録画か音声）" },
+    { on: on[1], lbl: "問題に1問正解する" },
+    { on: on[2], lbl: task ? `お題：${task}（済んだら、やってみたに一言）` : "やってみたを1つ残す" }
+  ];
+  return { items, count: items.filter(i => i.on).length };
+}
+
+/* ---------- 足あとを残す ---------- */
+let toastTimer;
+function toast(html){
+  let el = document.querySelector(".toast");
+  if (!el) { el = document.createElement("div"); el.className = "toast"; el.setAttribute("role","status"); document.body.appendChild(el); }
+  el.innerHTML = html; clearTimeout(toastTimer); toastTimer = setTimeout(() => el.remove(), 3400);
+}
+function demoDup(k, key){
+  const today = ymd(Date.now());
+  if (k === "correct" || k === "attend") return S.log.some(e => e.k === k && e.key === key);
+  return S.log.some(e => e.k === k && (e.key || null) === (key || null) && ymd(e.t) === today);
+}
+function afterAdded(k, t, key){
+  const r0 = readiness(); const wasReady = r0 && r0.count === 3;
+  S.log.push({ k, key: key || null, t });
+  const n = S.log.length, W = S.words;
+  let msg = `<b>一画</b>　${esc(KIND[k])}`;
+  if (k === "try" && S.log.filter(e => e.k === "try").length === 1) msg += `<br>${esc(W.firstTry)}`;
+  if (n === 5) msg = `<b>正</b>　${esc(W.tally5)}`;
+  if (n === 10) msg = `<b>正 正</b>　${esc(W.tally10)}`;
+  const r1 = readiness();
+  if (!wasReady && r1 && r1.count === 3) msg = `<b>準備ととのった</b>　${esc(W.ready)}`;
+  toast(msg);
+}
+async function record(k, key){
+  key = key == null ? null : String(key);
+  try {
+    if (MODE === "api") { const r = await api("/api/event", { method: "POST", body: { k, key } }); if (r.added) afterAdded(k, r.t, key); }
+    else if (!demoDup(k, key)) afterAdded(k, Date.now(), key);
+  } catch(e) { toast(esc(e.message)); }
+}
+
+/* ---------- 正の字 ---------- */
+function tallySVG(total, fresh){
+  const strokes = ["M8 8 L32 8", "M20 8 L20 34", "M20 20 L31 20", "M10 20 L10 34", "M6 34 L34 34"];
+  let out = "", i = 0;
+  for (let g = 0; g < Math.ceil(total / 5); g++) {
+    let paths = "";
+    for (let s = 0; s < 5 && i < total; s++, i++) {
+      const jit = ((i * 37) % 7 - 3) * 0.35;
+      const d = strokes[s].replace(/(\d+) (\d+)/g, (m, x, y) => `${(+x + jit).toFixed(1)} ${(+y - jit).toFixed(1)}`);
+      paths += `<path d="${d}" class="${i >= total - fresh ? "new" : ""}"/>`;
+    }
+    out += `<svg viewBox="0 0 40 40" aria-hidden="true">${paths}</svg>`;
+  }
+  return out;
+}
+
+/* ============================================================
+   参加者の画面
+   ============================================================ */
+const ICON = {
+  home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="12" rx="1"/><path d="M8 21h8"/></svg>',
+  list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8"/></svg>',
+  q: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5V14"/><circle cx="12" cy="17.3" r=".6" fill="currentColor"/></svg>',
+  steps: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5v14M9 5v14M13 5v14M17 5v14M3 16l17-8"/></svg>',
+  ask: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v11H9l-5 4z"/></svg>',
+  letter: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="1"/><path d="M3 7l9 6 9-6"/></svg>',
+  people: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"/><path d="M3 19c0-3 3-5 6-5s6 2 6 5"/><path d="M16 5a3 3 0 0 1 0 6M18 14c2 .6 3 2.3 3 5"/></svg>',
+  gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg>'
+};
+const MEMBER_TABS = [["home","黒板","home"],["lessons","一覧","list"],["review","おさらい","q"],["steps","足あと","steps"],["ask","質問","ask"]];
+const TEACHER_TABS = [["t-lessons","中身","list"],["t-letters","便り","letter"],["t-people","様子","people"],["t-questions","質問","ask"],["t-settings","設定","gear"]];
+
+function shareAsk(){
+  if (S.me.askedShare) return "";
+  return `<section class="panel ask-share">
+    <h2>講師に足あとを見せますか</h2>
+    <p>見せると、講師があなたの画数と準備の進み具合を見られます。やってみたの文や質問は見えません。見せなくても、使えることは変わりません。あとから足あとの画面で変えられます。</p>
+    <div class="row"><button class="btn-chalk" data-share="1">見せる</button><button data-share="0">見せない</button></div>
+  </section>`;
+}
+
+function home(){
+  const n = nextLesson(), l = lastDone(), W = S.words;
+  let board;
+  if (n) {
+    board = `<section class="board" aria-label="次の回">
+      <div class="label">次の回まで あと</div>
+      <div class="count">${daysUntil(n.date)}<small>日</small></div>
+      <div class="chalkline"></div>
+      <div class="next-title">第${n.no}回　${esc(n.title)}</div>
+      <div class="when">${fmt(n.date)}</div>
+      ${l && l.data && l.data.task ? `<p style="margin:10px 0 0;font-size:14px">次回までのお題：${esc(l.data.task)}</p>` : ""}
+      <div class="prep">
+        ${l ? `<button class="btn-chalk" data-open="${l.no}">第${l.no}回をおさらい</button>` : ""}
+        ${l ? `<button class="btn-ghost-board" data-go="review">今週の1問</button>` : ""}
+      </div></section>`;
+  } else {
+    board = `<section class="board"><div class="label">次の回</div><div class="next-title">日程は、講師からのお知らせを待ちましょう</div>
+      ${l ? `<div class="prep"><button class="btn-chalk" data-open="${l.no}">第${l.no}回をおさらい</button></div>` : ""}</section>`;
+  }
+  const lastT = S.log.reduce((a, e) => Math.max(a, e.t), 0);
+  const idle = l && lastT && Date.now() - lastT > 7 * DAY;
+  let flow = "";
+  if (l && n) {
+    const lt = Date.parse(l.date), nt = Date.parse(n.date);
+    const steps = [
+      { at: lt, when: "講習の当日夜", what: "今日の3つと録画が届く" },
+      { at: lt + 3*DAY, when: "3日後", what: "確認問題を1問" },
+      { at: lt + 7*DAY, when: "7日後", what: "もう1問と「やってみた？」" },
+      { at: nt - 3*DAY, when: "次回の3日前", what: "予告と1分の予習音声" },
+      { at: nt, when: "次回の冒頭", what: "前回の質問に講師が答える" }];
+    const today0 = new Date(); today0.setHours(0,0,0,0);
+    let marked = false;
+    flow = `<section class="panel"><h2>講習のあとに届くもの</h2><p class="muted">${esc(S.channel)}で届きます。ここはその中身を置いておく場所です。</p><ol class="flow">` +
+      steps.map(s => {
+        const d0 = new Date(s.at); d0.setHours(0,0,0,0);
+        let cls = "", st = "";
+        if (d0 < today0) { cls = "done"; st = "届いた"; }
+        else if (!marked) { cls = "today"; st = d0.getTime() === today0.getTime() ? "今日" : "次に届く"; marked = true; }
+        return `<li class="${cls}"><span class="dot">${cls === "done" ? "✓" : ""}</span><div><div class="when">${s.when}・${md(s.at)}<span class="state">${st}</span></div><div>${s.what}</div></div></li>`;
+      }).join("") + `</ol></section>`;
+  }
+  return `${shareAsk()}${board}
+  ${idle ? `<div class="word">${esc(W.idle)}<span class="by">${esc(S.teacherName)}より</span></div>` : ""}
+  ${readyHTML()}
+  <section class="tally-board" aria-label="これまでの足あと">
+    <div style="font-size:13px;opacity:.8">これまでの足あと</div>
+    <div class="big">${S.log.length}<small>画</small></div>
+    <div class="tally">${tallySVG(S.log.length, 0)}</div>
+    <div style="margin-top:10px"><button class="btn-ghost-board" data-go="steps">足あとを見る</button></div>
+  </section>
+  ${flow}
+  ${S.others.length ? `<section class="panel"><h2>ほかの人の「やってみた」</h2><ul class="notes">${S.others.map(o => `<li><div class="who">参加者のひとり・${md(o.t)}</div>${esc(o.text)}</li>`).join("")}</ul></section>` : ""}`;
+}
+
+function readyHTML(){
+  const r = readiness(); if (!r) return "";
+  return `<section class="panel ready">
+    <h2>次の回の準備　${r.count}/3</h2>
+    <div class="meter">${r.items.map(i => `<span class="${i.on ? "on" : ""}"></span>`).join("")}</div>
+    <ul>${r.items.map(i => `<li class="${i.on ? "on" : ""}"><span class="box">${i.on ? "✓" : ""}</span><span class="lbl">${esc(i.lbl)}</span></li>`).join("")}</ul>
+    ${r.count === 3 ? `<div class="word">${esc(S.words.ready)}<span class="by">${esc(S.teacherName)}より</span></div>` : `<p class="muted" style="margin:0">3つそろうと、講師からひとことが届きます。</p>`}
+  </section>`;
+}
+
+function lessons(){
+  if (!S.lessons.length) return `<h2>回の一覧</h2><p class="muted">まだ回がありません。講師が中身を入れると、ここに並びます。</p>`;
+  const seen = new Set(S.log.filter(e => e.k === "review").map(e => e.key));
+  return `<h2>回の一覧</h2><div class="lessons">` + S.lessons.map(l => {
+    const chip = l.status === "done" ? (seen.has(String(l.no)) ? '<span class="chip seen">見返した</span>' : '<span class="chip">まだ</span>')
+      : l.status === "next" ? `<span class="chip next">あと${daysUntil(l.date)}日</span>`
+      : l.status === "prep" ? '<span class="chip">準備中</span>' : '<span class="chip">予定</span>';
+    return `<button class="lesson-row" ${l.status === "done" ? `data-open="${l.no}"` : "disabled"}>
+      <span class="no">${l.no}<small>回</small></span>
+      <span><span class="t">${esc(l.title)}</span><br><span class="muted">${fmt(l.date)}</span></span>${chip}</button>`;
+  }).join("") + `</div><p class="muted">終わった回だけ開けます。講師が中身を入れると開きます。</p>`;
+}
+
+function ytId(u){
+  if (!u) return "";
+  const m = u.match(/(?:youtu\.be\/|v=|\/embed\/|\/live\/|\/shorts\/)([\w-]{11})/);
+  return m ? m[1] : "";
+}
+
+let lessonTab = "text", openNo = null;
+const answered = {};
+function lesson(no){
+  const l = S.lessons.find(x => x.no === no && x.status === "done");
+  if (!l) return lessons();
+  const d = l.data;
+  const attended = S.log.some(e => e.k === "attend" && e.key === String(no));
+  const vid = ytId(l.video);
+  const tabBody = lessonTab === "text"
+    ? d.text.map(p => `<p>${esc(p)}</p>`).join("")
+    : (d.terms.length ? `<dl class="terms">${d.terms.map(t => `<div><dt>${esc(t[0])}</dt><dd>${esc(t[1])}</dd></div>`).join("")}</dl>` : `<p class="muted">この回の用語はありません。</p>`);
+  const audioSrc = MODE === "api" && l.audio ? `/api/audio/${no}?t=${encodeURIComponent(TOKEN)}` : "";
+  const mine = S.myTries.filter(t => t.lesson === no);
+  return `
+  <button class="back" data-go="lessons">← 回の一覧</button>
+  <div><div class="muted">第${l.no}回・${fmt(l.date)}</div><h2 style="font-size:24px">${esc(l.title)}</h2>
+    ${attended ? `<span class="chip seen">出席の一画あり</span>` : `<button data-attend="${no}">この回に出ました</button>`}</div>
+  <section class="panel"><h3>今日の3つ</h3><ol class="three">${d.three.map(t => `<li><span>${esc(t)}</span></li>`).join("")}</ol></section>
+  <section class="panel"><h3>録画</h3>
+    ${vid ? `<div class="video"><iframe src="https://www.youtube-nocookie.com/embed/${vid}" title="第${no}回の録画" allow="encrypted-media; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>
+      <p class="muted" style="margin-top:8px">見たら押してください　<button data-watched="${no}">録画を見た</button></p>`
+      : `<div class="media">${MODE === "demo" ? "ここに講習の録画が入ります（YouTubeの限定公開）" : "録画はまだありません"}</div>`}
+  </section>
+  <section class="panel">
+    <h3>1分のおさらい（講師の声）</h3>
+    ${audioSrc ? `<audio controls preload="none" src="${audioSrc}" data-listen="${no}"></audio>`
+      : `<div class="audio"><button class="play" data-fakeplay="${no}" aria-label="おさらい音声を再生"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"/></svg></button>
+        <div class="muted" id="audioNote">${MODE === "demo" ? "移動中や施術の合間に聞けます" : "音声はまだありません"}</div></div>`}
+  </section>
+  <section class="panel">
+    <div class="tabs-inline" role="tablist">
+      <button role="tab" aria-selected="${lessonTab === "text"}" data-ltab="text">テキスト</button>
+      <button role="tab" aria-selected="${lessonTab === "terms"}" data-ltab="terms">用語集</button>
+    </div>${tabBody}
+  </section>
+  <section class="panel"><h3>確認問題</h3>${quizHTML(l)}</section>
+  <section class="panel">
+    <h3>やってみた</h3>
+    ${d.task ? `<p>次回までのお題：<b>${esc(d.task)}</b></p>` : ""}
+    <p class="muted">習ったことを試したら、一言残しましょう。個人がわかること（お客さま・患者さんの名前や体のことなど）は書かないでください。</p>
+    <label class="field" for="tryText">ひとこと<textarea id="tryText" placeholder="例：休診のお知らせをAIに下書きしてもらった"></textarea></label>
+    <label class="check" style="margin-top:8px"><input type="checkbox" id="tryPublic"> ほかの参加者にも見せる（名前は出ません）</label>
+    <div style="margin-top:8px"><button class="btn-chalk" data-try="${no}">残す</button></div>
+    ${mine.length ? `<ul class="notes">${mine.map(m => `<li><div class="who">自分・${md(m.t)}${m.public ? "・みんなに見せる" : ""}</div>${esc(m.text)}</li>`).join("")}</ul>` : ""}
+  </section>`;
+}
+
+function quizHTML(l, only){
+  const list = only !== undefined ? [only] : l.data.quiz.map((_, i) => i);
+  if (!l.data.quiz.length) return `<p class="muted">この回の問題はありません。</p>`;
+  const done = new Set(S.log.filter(e => e.k === "correct").map(e => e.key));
+  return `<div class="qs">` + list.map(qi => {
+    const q = l.data.quiz[qi], key = l.no + "-" + qi, got = answered[key];
+    return `<div class="q"><div class="stem">問${qi+1}　${esc(q.stem)}${done.has(key) && got === undefined ? ' <span class="chip seen">正解ずみ</span>' : ""}</div>` +
+      q.opts.map((o, j) => {
+        let c = "opt";
+        if (got !== undefined) c += j === q.a ? " right" : (j === got ? " wrong" : "");
+        return `<button class="${c}" data-q="${key}" data-j="${j}" ${got !== undefined ? "disabled" : ""}>${esc(o)}</button>`;
+      }).join("") +
+      (got !== undefined ? `<div class="exp">${got === q.a ? "そのとおり。" : "答えは「" + esc(q.opts[q.a]) + "」。"}${esc(q.exp)}</div>${got !== q.a ? `<button class="btn-quiet" data-retry="${key}">もう一度答える</button>` : ""}` : "") + `</div>`;
+  }).join("") + `</div>`;
+}
+
+function review(){
+  const l = lastDone();
+  if (!l) return `<h2>おさらい</h2><p class="muted">終わった回がまだありません。</p>`;
+  const done = new Set(S.log.filter(e => e.k === "correct").map(e => e.key));
+  let pick = l.data.quiz.findIndex((_, i) => !done.has(l.no + "-" + i));
+  if (pick < 0) pick = Math.floor((Date.now() - Date.parse(l.date)) / (3*DAY)) % Math.max(1, l.data.quiz.length);
+  return `<h2>今週の1問</h2>
+  <section class="panel">${l.data.quiz.length ? quizHTML(l, pick) : `<p class="muted">この回の問題はありません。</p>`}</section>
+  <section class="panel"><h3>第${l.no}回の今日の3つ</h3><ol class="three">${l.data.three.map(t => `<li><span>${esc(t)}</span></li>`).join("")}</ol></section>
+  ${l.data.quiz.length > 1 ? `<section class="panel"><h3>全部の問題</h3>${quizHTML(l)}</section>` : ""}`;
+}
+
+function steps(){
+  const log = S.log, count = k => log.filter(e => e.k === k).length;
+  const firstL = S.lessons.find(l => l.status === "done") || S.lessons[0];
+  let weeks = "";
+  if (firstL) {
+    const s0 = new Date(firstL.date); s0.setHours(0,0,0,0);
+    weeks = [0,1,2,3].map(w => {
+      const s = s0.getTime() + w*7*DAY, e = s + 7*DAY;
+      const n = log.filter(x => x.t >= s && x.t < e).length;
+      return `<div class="${n ? "on" : ""}"><b>${n}</b>${md(s)}〜</div>`;
+    }).join("");
+  }
+  const hist = [...log].sort((a,b) => b.t - a.t).slice(0, 40).map(e => `<li><span class="d">${md(e.t)}</span><span>${esc(KIND[e.k] || e.k)}</span></li>`).join("");
+  const ev = S.everyone;
+  return `<h2>足あと</h2>
+  <section class="tally-board">
+    <div style="font-size:13px;opacity:.8">やったことが一つ増えるたびに一画</div>
+    <div class="big">${log.length}<small>画</small></div>
+    <div class="tally">${tallySVG(log.length, 1)}</div>
+    <p style="margin:10px 0 0;font-size:13px;opacity:.85">同じ日に同じことをしても一画。数を競うものではありません。</p>
+  </section>
+  <section class="panel"><h3>やったことの内訳</h3>
+    <div class="kinds">
+      <div><b>${count("review") + count("listen")}</b><span>見返した・聞いた</span></div>
+      <div><b>${count("correct")}</b><span>正解した問題</span></div>
+      <div><b>${count("try")}</b><span>やってみた</span></div>
+    </div></section>
+  ${weeks ? `<section class="panel"><h3>週ごとの印</h3><p class="muted">毎日でなくて大丈夫。週に一つでも印がつけば十分です。</p><div class="weeks">${weeks}</div></section>` : ""}
+  ${readyHTML()}
+  <section class="panel"><h3>みんなの様子</h3>
+    <div class="everyone">
+      <div class="dots" aria-hidden="true">${Array.from({ length: Math.min(ev.total, 40) }, (_, i) => `<i class="${i < ev.tried ? "on" : ""}"></i>`).join("")}</div>
+      <p style="margin:0">この1週間で、${ev.total}人中<b>${ev.tried}人</b>がやってみたを残しました${MODE === "demo" ? '<span class="sample">見本</span>' : ""}</p>
+    </div>
+    <p class="muted" style="margin-top:8px">人数だけを出し、誰が何をしたかは出しません。</p></section>
+  <section class="panel"><h3>講師に見せるか</h3>
+    <label class="check"><input type="checkbox" id="shareToggle" ${S.me.showTeacher ? "checked" : ""}> 講師に画数と準備の進み具合を見せる</label>
+    <p class="muted" style="margin-top:6px">やってみたの文や質問は、ここを選んでも講師には名前つきで見えません。</p></section>
+  <section class="panel"><h3>これまでの記録</h3>${hist ? `<ul class="history">${hist}</ul>` : `<p class="muted">まだありません。</p>`}</section>
+  ${MODE === "api" ? `<section class="panel"><p class="muted">${esc(S.me.name)} として入っています。</p><button class="btn-quiet" data-logout>この端末から出る</button></section>` : ""}`;
+}
+
+function ask(){
+  return `<h2>質問ボックス</h2>
+  <section class="panel">
+    <p>講習のあとで浮かんだ疑問を送ってください。名前は付かずに講師に届き、次回の冒頭やここで答えます。</p>
+    <label class="field" for="askText">質問<textarea id="askText" placeholder="個人がわかること（お客さま・患者さんの名前や体のことなど）は書かないでください"></textarea></label>
+    <div style="margin-top:8px"><button class="btn-chalk" data-asksend>送る</button></div>
+    <div id="askMsg"></div>
+  </section>
+  <section class="panel"><h3>講師の答え</h3>
+    ${S.answers.length ? S.answers.map(x => `<div class="qa"><div class="qq">${esc(x.q)}</div><div class="aa">${esc(x.a)}</div></div>`).join("") : `<p class="muted">まだありません。</p>`}
+  </section>`;
+}
+
+/* ============================================================
+   講師の画面
+   ============================================================ */
+const PROMPT = (course, no, title, audience, ng) => `あなたは講習の復習用教材を作る手伝いをします。
+下に貼る講習の文字起こし（またはメモ）をもとに、次の形で下書きを作ってください。
+
+【講習】
+講座名：${course}
+回：第${no}回
+題：${title}
+受講者：${audience}
+
+【作るもの】
+1. 今日の3つ：要点を3つ。1つ20字前後
+2. テキスト：読んで復習する文。3〜5段落。1段落100〜150字
+3. 用語集：講習で出てきた言葉を3〜6個。それぞれ1行で説明
+4. 確認問題：3問。選択肢は3つ。答えと、1〜2文の解説
+5. 次回までのお題：1つ。15分でできること
+
+【守ること】
+- 講習で話していないことを足さない。わからないところは「（講師確認）」と書く
+- 個人がわかること（お客さま・患者さんの名前、体のこと、写真など）は入れない
+- 講習で「外には出さない」とした内容は書かない
+- 言い切りすぎない（「必ず」「絶対」など）${ng.length ? `
+- 次の言葉は使わない：${ng.join("、")}` : ""}
+- 料金や数字は、講習で言ったものだけを使う
+- やさしい言葉で。専門用語を使うときは用語集に入れる
+
+【返す形】
+次のJSONだけを返してください。
+{
+  "three": ["要点1", "要点2", "要点3"],
+  "text": ["段落1", "段落2", "段落3"],
+  "terms": [["言葉", "説明"]],
+  "quiz": [{"stem": "問い", "opts": ["選択肢1", "選択肢2", "選択肢3"], "a": 0, "exp": "解説"}],
+  "task": "次回までのお題"
+}
+（"a" は正解の選択肢の番号。1つ目が0、2つ目が1、3つ目が2）
+
+【文字起こし】
+（ここに貼る）`;
+
+const ngList = () => (TS && TS.ngWords || "").split(/[、,，\s]+/).map(w => w.trim()).filter(Boolean);
+function parseLessonJSON(txt){
+  if (!txt.trim()) return { data: null };
+  let s = txt.trim().replace(/^```(?:json)?/i, "").replace(/```$/, "").trim();
+  const a = s.indexOf("{"), b = s.lastIndexOf("}");
+  if (a < 0 || b < a) return { error: "{ から } までの形が見つかりません。Claudeの返事のJSONの部分を貼ってください。" };
+  let d; try { d = JSON.parse(s.slice(a, b + 1)); } catch(e) { return { error: "形が読めませんでした。貼るときに途中が欠けていないか確かめてください。" }; }
+  const errs = [];
+  if (!Array.isArray(d.three) || d.three.length < 1) errs.push("今日の3つ（three）がありません");
+  if (!Array.isArray(d.text) || !d.text.length) errs.push("テキスト（text）がありません");
+  d.terms = Array.isArray(d.terms) ? d.terms.filter(t => Array.isArray(t) && t[0] && t[1]) : [];
+  d.quiz = Array.isArray(d.quiz) ? d.quiz : [];
+  d.quiz.forEach((q, i) => { if (!q || !q.stem || !Array.isArray(q.opts) || !Number.isInteger(q.a) || q.a < 0 || q.a >= q.opts.length) errs.push(`問題${i+1}の形がおかしいところがあります（答えの番号など）`); });
+  d.task = typeof d.task === "string" ? d.task : "";
+  if (errs.length) return { error: errs.join("／") };
+  const all = JSON.stringify(d);
+  const hits = ngList().filter(w => all.includes(w));
+  const check = all.includes("講師確認");
+  return { data: d, hits, check };
+}
+
+function tLessons(){
+  return `<h2>回の中身</h2>
+  <p class="muted">講習が終わったら、Claudeで中身を作って貼り、公開します。</p>
+  <div class="lessons">${TS.lessons.map(l => {
+    const chip = l.status === "done" ? '<span class="chip pub">公開中</span>' : l.status === "prep" ? '<span class="chip draft">中身待ち</span>'
+      : l.status === "next" ? '<span class="chip next">次の回</span>' : '<span class="chip">予定</span>';
+    return `<button class="lesson-row" data-tedit="${l.no}"><span class="no">${l.no}<small>回</small></span>
+      <span><span class="t">${esc(l.title)}</span><br><span class="muted">${fmt(l.date)}${l.audio ? "・音声あり" : ""}${l.video ? "・録画あり" : ""}</span></span>${chip}</button>`;
+  }).join("") || '<p class="muted">まだありません。</p>'}</div>
+  <button class="btn-chalk" data-tedit="new">回を足す</button>`;
+}
+
+let editDraft = null;
+function tEdit(no){
+  const l = no === "new" ? null : TS.lessons.find(x => x.no === +no);
+  if (!editDraft || editDraft.key !== String(no)) {
+    const nextNo = TS.lessons.reduce((a, x) => Math.max(a, x.no), 0) + 1;
+    editDraft = { key: String(no), no: l ? l.no : nextNo, title: l ? l.title : "", date: l ? l.date : "", video: l ? l.video : "",
+      json: l && l.data ? JSON.stringify(l.data, null, 2) : "", published: l ? l.published : false, audio: l ? l.audio : false, isNew: !l };
+  }
+  const e = editDraft;
+  const parsed = parseLessonJSON(e.json);
+  let prev = "";
+  if (parsed.error) prev = `<div class="error">${esc(parsed.error)}</div>`;
+  else if (parsed.data) {
+    const d = parsed.data;
+    prev = `<div class="preview"><b>読み込めました</b>　今日の3つ ${d.three.length}・テキスト ${d.text.length}段落・用語 ${d.terms.length}・問題 ${d.quiz.length}問${d.task ? "・お題あり" : "・お題なし"}
+      <ol class="three" style="margin-top:8px">${d.three.map(t => `<li><span>${esc(t)}</span></li>`).join("")}</ol></div>
+      ${parsed.hits.length ? `<div class="error">使わない言葉が入っています：${parsed.hits.map(esc).join("、")}。直してから公開してください。</div>` : ""}
+      ${parsed.check ? `<div class="error">「講師確認」の箇所が残っています。中身を確かめて直してください。</div>` : ""}`;
+  }
+  return `<button class="back" data-go="t-lessons">← 回の中身</button>
+  <h2>${e.isNew ? "回を足す" : `第${e.no}回を直す`}</h2>
+  <section class="panel form">
+    <div class="row" style="flex-wrap:nowrap">
+      <label class="field" style="width:90px" for="eNo">回<input type="number" id="eNo" min="1" max="99" value="${e.no}" ${e.isNew ? "" : "disabled"}></label>
+      <label class="field" style="flex:1" for="eTitle">題<input type="text" id="eTitle" value="${esc(e.title)}" placeholder="例：院の文章をAIと直す"></label>
+    </div>
+    <label class="field" for="eDate">日時<input type="datetime-local" id="eDate" value="${toLocalInput(e.date)}"></label>
+    <label class="field" for="eVideo">録画（YouTubeの限定公開のアドレス）<input type="url" id="eVideo" value="${esc(e.video)}" placeholder="https://youtu.be/..."></label>
+    <p class="muted" style="margin:0">参加者の顔や名前が映る部分は、同意をとってから載せます。限定公開はアドレスを知れば誰でも見られます。</p>
+  </section>
+  <section class="panel form">
+    <h3>中身（Claudeで作る）</h3>
+    <ol class="muted" style="margin:0;padding-left:1.2em">
+      <li>「頼み文をコピー」を押す</li>
+      <li>Claudeに貼り、最後に講習の文字起こしかメモを足して送る</li>
+      <li>返ってきた文を下の欄に貼り、「読み込む」を押す</li>
+      <li>自分で読んで直す。表現はことば整えでも点検する</li>
+    </ol>
+    <div class="row"><button data-copyprompt>頼み文をコピー</button></div>
+    <label class="field" for="eJson">Claudeの返事を貼る<textarea class="code" id="eJson" placeholder='{ "three": [...], ... }'>${esc(e.json)}</textarea></label>
+    <div class="row"><button data-parse>読み込む</button></div>
+    ${prev}
+  </section>
+  <section class="panel form">
+    <h3>1分のおさらい（講師の声）</h3>
+    ${MODE === "api" ? (e.isNew ? `<p class="muted">先に回を保存すると、音声を付けられます。</p>`
+      : `${e.audio ? `<audio controls preload="none" src="/api/audio/${e.no}?t=${encodeURIComponent(TOKEN)}"></audio>` : `<p class="muted">まだありません。</p>`}
+        <label class="field" for="eAudio">音声のファイル（8MBまで。スマホのボイスメモで録ったものなど）<input type="file" id="eAudio" accept="audio/*"></label>
+        <div class="row"><button data-upaudio>音声を付ける</button>${e.audio ? `<button class="btn-danger" data-delaudio>音声を外す</button>` : ""}</div>`)
+      : `<p class="muted">見本では音声は付けられません。本番では、ここから自分の声の録音を付けます。</p>`}
+  </section>
+  <section class="panel form">
+    <label class="check"><input type="checkbox" id="ePub" ${e.published ? "checked" : ""}> 参加者に公開する（講習の日時を過ぎると開きます）</label>
+    <div class="row"><button class="btn-chalk" data-savelesson>保存する</button>${e.isNew ? "" : `<button class="btn-danger" data-dellesson>この回を消す</button>`}</div>
+    <div id="eMsg"></div>
+  </section>`;
+}
+function syncDraft(){
+  const g = id => document.getElementById(id);
+  if (!editDraft || !g("eTitle")) return;
+  editDraft.no = +g("eNo").value; editDraft.title = g("eTitle").value; editDraft.date = fromLocalInput(g("eDate").value);
+  editDraft.video = g("eVideo").value.trim(); editDraft.json = g("eJson").value; editDraft.published = g("ePub").checked;
+}
+
+function letters(){
+  const ls = TS.lessons;
+  const ld = [...ls].reverse().find(l => l.status === "done");
+  if (!ld) return `<h2>便りの文面</h2><p class="muted">公開した回ができると、${esc(TS.channel)}で送る文面がここに出ます。</p>`;
+  const nx = ls.find(l => l.status === "next");
+  const url = location.protocol.startsWith("http") && MODE === "api" ? location.origin : "（アプリのアドレス）";
+  const d = ld.data, lt = Date.parse(ld.date), q0 = d.quiz[0], q1 = d.quiz[1] || d.quiz[0];
+  const list = [
+    { when: "はじめて案内するとき", at: null, text: `【${TS.courseName}】講習のあとの、おさらいの場所です。\n下のリンクを開いて、呼び名と数字4けたの番号を決めて入ってください。ホーム画面に置いておくと、すぐ開けます。\n${joinLink(TS.memberCode)}` },
+    { when: "講習の当日夜", at: lt, text: `${TS.courseName} 第${ld.no}回、おつかれさまでした。\n今日の3つ\n${d.three.map((t, i) => `${"①②③"[i] || "・"}${t}`).join("\n")}\n録画とテキストはこちらから見返せます。\n${url}` },
+    q0 && { when: "3日後", at: lt + 3*DAY, text: `第${ld.no}回の確認問題を1問どうぞ。\n「${q0.stem}」\n答えはアプリで。\n${url}` },
+    { when: "7日後", at: lt + 7*DAY, text: `第${ld.no}回から1週間。${q1 ? `もう1問「${q1.stem}」と、` : ""}やってみた？\n${d.task ? `お題：${d.task}\n` : ""}試したら、アプリに一言残してください。\n${url}` },
+    nx && { when: "次回の3日前", at: Date.parse(nx.date) - 3*DAY, text: `第${nx.no}回「${nx.title}」は${fmt(nx.date)}です。\n${d.task ? `お題：${d.task}\n` : ""}1分のおさらい音声で、前回をふり返っておきましょう。\n${url}` },
+    { when: "動きの少ない週に（全員あて）", at: null, text: `${TS.words.idle}\n${url}` }
+  ].filter(Boolean);
+  return `<h2>便りの文面</h2>
+  <p class="muted">第${ld.no}回のあとに、${esc(TS.channel)}で送る文面です。押すとコピーされるので、${esc(TS.channel)}に貼って送るか予約してください。名前を出さず、全員あてに送ります。</p>
+  <section class="panel">${list.map((x, i) => `<div class="letter">
+    <div><b>${x.when}</b>${x.at ? `<span class="muted">　${fmt(x.at).replace(/\s\d+:\d+$/, "")}ごろ</span>` : ""}</div>
+    <pre id="letter${i}">${esc(x.text)}</pre>
+    <div><button data-copy="letter${i}">コピー</button></div></div>`).join("")}</section>`;
+}
+
+function people(){
+  const s = TS.stats;
+  return `<h2>みんなの様子</h2>
+  <section class="panel"><div class="tiles">
+    <div><b>${s.members}</b><span>参加者</span></div>
+    <div><b>${s.triedWeek}</b><span>この1週間でやってみた</span></div>
+    <div><b>${s.ready}</b><span>次の回の準備ととのった</span></div>
+    <div class="${s.idle ? "warn" : ""}"><b>${s.idle}</b><span>7日以上動きなし</span></div>
+  </div>
+  ${s.idle ? `<p class="muted" style="margin-top:10px">動きのない人がいるときは、便りの「動きの少ない週に」の文を全員あてに送ります。</p>` : ""}${MODE === "demo" ? '<span class="sample">見本</span>' : ""}</section>
+  <section class="panel"><h3>見せると選んだ人</h3>
+    <p class="muted">本人が「講師に見せる」を選んだ人だけが出ます。</p>
+    ${TS.shared.length ? `<table class="people"><thead><tr><th>呼び名</th><th>画数</th><th>準備</th><th>最後</th></tr></thead><tbody>
+      ${TS.shared.map(p => `<tr><td>${esc(p.name)}</td><td class="n">${p.strokes}</td><td class="n">${p.ready}/3</td><td class="n">${p.last ? md(p.last) : "—"}</td></tr>`).join("")}</tbody></table>`
+      : `<p class="muted">まだいません。</p>`}
+  </section>`;
+}
+
+function tQuestions(){
+  return `<h2>届いた質問</h2>
+  <p class="muted">名前は付いていません。答えると、参加者全員の質問の画面に出ます。</p>
+  ${TS.questions.length ? TS.questions.map(q => `<section class="panel form">
+      <div class="muted">${md(q.t)}${q.lesson ? `・第${q.lesson}回のあと` : ""}</div>
+      <div style="font-weight:700">${esc(q.text)}</div>
+      <label class="field" for="ans${q.id}">答え<textarea id="ans${q.id}"></textarea></label>
+      <div class="row"><button class="btn-chalk" data-answer="${q.id}">答える</button><button class="btn-quiet" data-closeq="${q.id}">答えずに閉じる（当日に話す など）</button></div>
+    </section>`).join("") : `<section class="panel"><p class="muted" style="margin:0">新しい質問はありません。</p></section>`}
+  <section class="panel"><h3>これまでの答え</h3>
+    ${TS.answers.length ? TS.answers.map(a => `<div class="qa"><div class="qq">${esc(a.q)}</div><div class="aa">${esc(a.a)}</div><div><button class="btn-quiet" data-delans="${a.id}">消す</button></div></div>`).join("") : `<p class="muted">まだありません。</p>`}
+  </section>`;
+}
+
+function tSettings(){
+  return `<h2>設定</h2>
+  <section class="panel form">
+    <h3>参加者に送るもの</h3>
+    <p style="margin:0">このリンクを送ると、参加者は合言葉を打たずに入れます。</p>
+    <pre class="muted" id="joinLink" style="white-space:pre-wrap;margin:0;font-size:14px">${esc(joinLink(TS.memberCode))}</pre>
+    <div class="row"><button data-copy="joinLink">リンクをコピー</button></div>
+    <p class="muted" style="margin:0">参加者の合言葉：<b>${esc(TS.memberCode || "")}</b></p>
+  </section>
+  <section class="panel form">
+    <label class="field" for="sCourse">講座の名前<input type="text" id="sCourse" value="${esc(TS.courseName)}"></label>
+    <label class="field" for="sTeacher">講師の呼び名<input type="text" id="sTeacher" value="${esc(TS.teacherName)}"></label>
+    <details>
+      <summary style="cursor:pointer;padding:6px 0">細かい設定（変えなくても使えます）</summary>
+      <div class="form" style="margin-top:10px">
+        <label class="field" for="sChannel">便りを届ける手段<input type="text" id="sChannel" value="${esc(TS.channel)}" placeholder="例：LINE、メール"></label>
+        <label class="field" for="sAudience">受講者の説明（Claudeへの頼み文に入ります）<textarea id="sAudience" style="min-height:64px">${esc(TS.audience)}</textarea></label>
+        <label class="field" for="sNg">気をつける言葉（中身を貼ったとき、入っていたら知らせます）<textarea id="sNg" style="min-height:64px">${esc(TS.ngWords)}</textarea></label>
+        <h3 style="margin:4px 0 0">講師のひとこと（節目に出ます）</h3>
+        ${Object.keys(WORD_LABEL).map(k => `<label class="field" for="w_${k}">${WORD_LABEL[k]}<input type="text" id="w_${k}" value="${esc(TS.words[k])}"></label>`).join("")}
+      </div>
+    </details>
+    <div class="row"><button class="btn-chalk" data-savesettings>保存する</button></div><div id="sMsg"></div>
+  </section>
+  <details class="panel">
+    <summary style="cursor:pointer">合言葉と暗証番号</summary>
+    <div class="form" style="margin-top:12px">
+      <label class="field" for="cTeacher">講師の合言葉を変える（6字以上）<input type="text" id="cTeacher" autocomplete="off"></label>
+      <div class="row"><button data-changecode>変える</button></div>
+      <p class="muted" style="margin:0">参加者の合言葉を作り直すと、前のリンクでは新しく入れなくなります（もう入っている人はそのまま使えます）。</p>
+      <div class="row"><button data-newmember>参加者の合言葉を作り直す</button></div>
+      <label class="field" for="rName">暗証番号を忘れた人の呼び名<select id="rName">${TS.names.map(n => `<option>${esc(n)}</option>`).join("")}</select></label>
+      <div class="row"><button data-resetpin>番号を再設定する</button></div>
+      <div id="rMsg"></div>
+    </div>
+  </details>
+  <section class="panel"><a href="manual.html" target="_blank" rel="noopener">主催者マニュアルを開く</a></section>
+  ${MODE === "api" ? `<section class="panel"><button class="btn-quiet" data-logout>この端末から出る</button></section>` : `<p class="muted"><button class="switch" data-demosetup>はじめの設定の画面を見る（見本）</button></p>`}`;
+}
+
+/* ============================================================
+   はじめの設定（置いて最初に開いた人＝講師が、4つ答えるだけ）
+   ============================================================ */
+const FIELD_LABEL = [["health","施術・健康"],["beauty","美容・サロン"],["business","経営・商い"],["hobby","趣味・習いごと"],["other","そのほか"]];
+const FIELD_PRESET = {
+  health: { audience: "施術や健康の仕事をする人。AIやパソコンが得意でない人も多い", ngWords: "治る、治す、完治、必ず、絶対、診断、副作用なし" },
+  beauty: { audience: "美容の仕事をする人。AIやパソコンが得意でない人も多い", ngWords: "必ず、絶対、治る、消える、若返る" },
+  business: { audience: "お店や事業を営む人。AIやパソコンが得意でない人も多い", ngWords: "必ず儲かる、絶対、確実に、保証" },
+  hobby: { audience: "習いごとの生徒。年齢も経験もさまざま", ngWords: "" },
+  other: { audience: "講座の参加者。AIやパソコンが得意でない人もいる", ngWords: "必ず、絶対" }
+};
+let setupField = "other", setupDone = null;
+function setupView(msg){
+  if (setupDone) return `<div class="login">
+    <section class="board"><div class="next-title">できました</div><div class="chalkline" style="margin:10px 0"></div>
+      <div class="when">あとは講習のたびに、中身を貼って公開するだけです。</div></section>
+    <section class="panel form">
+      <h3>参加者に送るもの</h3>
+      <p style="margin:0">このリンクを参加者に送ると、合言葉を打たずに入れます。</p>
+      <pre class="muted" id="joinLink" style="white-space:pre-wrap;margin:0;font-size:14px">${esc(joinLink(setupDone.memberCode))}</pre>
+      <div class="row"><button data-copy="joinLink">リンクをコピー</button></div>
+      <p class="muted" style="margin:0">参加者の合言葉：<b>${esc(setupDone.memberCode)}</b>（設定の画面でいつでも見られます）</p>
+      <div class="error">講師の合言葉は、紙などに控えてください。画面には二度と出ません。</div>
+      <button class="btn-chalk" data-setupnext>講師の画面へ</button>
+    </section></div>`;
+  return `<div class="login">
+    <section class="board"><div class="next-title">はじめの設定</div><div class="chalkline" style="margin:10px 0"></div>
+      <div class="when">4つ答えるだけです。あとから設定の画面で直せます。</div></section>
+    <section class="panel form">
+      <label class="field" for="uCourse">1. 講座の名前<input type="text" id="uCourse" maxlength="60" placeholder="例：はじめてのAI講座"></label>
+      <label class="field" for="uTeacher">2. 講師の呼び名<input type="text" id="uTeacher" maxlength="30" placeholder="例：山田"></label>
+      <div class="field">3. どんな分野の講座ですか
+        <div class="row" role="radiogroup">${FIELD_LABEL.map(([k, l]) => `<button role="radio" aria-checked="${setupField === k}" class="${setupField === k ? "btn-board" : ""}" data-field="${k}">${l}</button>`).join("")}</div>
+        <span class="muted">分野に合わせて、Claudeへの頼み方と、気をつける言葉の初めの形が入ります。</span></div>
+      <label class="field" for="uCode">4. 講師の合言葉（自分で決める・6字以上）<input type="text" id="uCode" maxlength="60" autocomplete="off" placeholder="人に知られない言葉"></label>
+      <button class="btn-chalk" data-setupsave>はじめる</button>
+      ${msg ? `<div class="error">${esc(msg)}</div>` : ""}
+    </section></div>`;
+}
+function joinLink(code){
+  const base = MODE === "api" ? location.origin + "/" : "https://（あなたのアドレス）/";
+  return base + "?c=" + encodeURIComponent(code || "");
+}
+
+/* ============================================================
+   入口・切り替え
+   ============================================================ */
+function loginView(step, msg){
+  return `<div class="login">
+    <section class="board"><div class="next-title">次の回まで</div><div class="chalkline" style="margin:10px auto"></div><div class="when">講習のあとの、おさらいの場所</div></section>
+    <section class="panel form">
+      ${step === "name" ? `
+        <p style="margin:0">呼び名と、数字4けたの暗証番号を入れてください。はじめての方は、ここで決めたものが次から必要になります。</p>
+        <label class="field" for="lName">呼び名（ほかの人と重ならないもの）<input type="text" id="lName" maxlength="20" autocomplete="nickname"></label>
+        <label class="field" for="lPin">暗証番号（数字4けた）<input type="password" id="lPin" inputmode="numeric" maxlength="4" autocomplete="current-password"></label>
+        <button class="btn-chalk" data-login2>入る</button>`
+      : `<label class="field" for="lCode">合言葉（講師から届いたもの）<input type="password" id="lCode" autocomplete="off"></label>
+        <button class="btn-chalk" data-login1>次へ</button>`}
+      ${msg ? `<div class="error">${esc(msg)}</div>` : ""}
+    </section></div>`;
+}
+let loginCode = "";
+
+let current = "home", currentArg = null;
+function setNav(){
+  const nav = document.getElementById("nav"), inner = document.getElementById("navInner");
+  if (!ROLE) { nav.hidden = true; return; }
+  nav.hidden = false;
+  const tabs = ROLE === "t" ? TEACHER_TABS : MEMBER_TABS;
+  inner.innerHTML = tabs.map(([go, lbl, ic]) => `<button data-go="${go}">${ICON[ic]}${lbl}</button>`).join("");
+}
+function setHeader(){
+  const c = document.getElementById("courseName");
+  const name = ROLE === "t" ? TS && TS.courseName : S && S.courseName;
+  c.innerHTML = (name ? esc(name) : "") + (MODE === "demo" ? '<span class="sample">見本</span>' : "") +
+    (ROLE === "t" ? '<span class="sample">講師</span>' : "") +
+    (MODE === "demo" && ROLE ? `<br><button class="switch" data-role="${ROLE === "t" ? "m" : "t"}">${ROLE === "t" ? "参加者の画面を見る" : "講師の画面を見る"}</button>` : "");
+}
+function render(name, arg){
+  current = name; currentArg = arg;
+  const v = document.getElementById("view");
+  let html;
+  if (name === "setup") html = setupView(arg);
+  else if (!ROLE) html = loginView(name === "login-name" ? "name" : "code", arg);
+  else if (ROLE === "t") html = ({ "t-lessons": tLessons, "t-letters": letters, "t-people": people, "t-questions": tQuestions, "t-settings": tSettings })[name]?.() ?? (name === "t-edit" ? tEdit(arg) : tLessons());
+  else html = name === "lesson" ? lesson(arg) : (({ home, lessons, review, steps, ask })[name] || home)();
+  v.innerHTML = html;
+  setHeader();
+  const navKey = name === "lesson" ? "lessons" : name === "t-edit" ? "t-lessons" : name;
+  document.querySelectorAll("#navInner button").forEach(b => b.dataset.go === navKey ? b.setAttribute("aria-current", "page") : b.removeAttribute("aria-current"));
+  v.classList.remove("view"); void v.offsetWidth; v.classList.add("view");
+  const h = name === "lesson" ? "lesson-" + arg : (name === "t-edit" || name === "setup" || name.startsWith("login")) ? "" : name;
+  if (h && location.hash.slice(1) !== h) { try { history.replaceState(null, "", "#" + h); } catch(e) {} }
+  document.querySelectorAll("audio[data-listen]").forEach(a => a.addEventListener("play", () => record("listen", a.dataset.listen), { once: true }));
+}
+function rerenderKeepScroll(){ const y = window.scrollY; render(current, currentArg); window.scrollTo(0, y); }
+function go(name, arg){ render(name, arg); window.scrollTo(0, 0); }
+
+async function enter(role){
+  ROLE = role;
+  if (role === "t") { await loadTeacher(); setNav(); fromHash("t-lessons"); }
+  else { await loadMember(); setNav(); fromHash("home"); }
+}
+function logout(silent){
+  TOKEN = null; ROLE = null; drop("tsugi_token"); drop("tsugi_role");
+  setNav(); go("login", silent ? "もう一度、合言葉から入ってください" : "");
+}
+function fromHash(fallback){
+  const h = location.hash.slice(1);
+  if (ROLE === "m") {
+    const m = h.match(/^lesson-(\d+)$/);
+    if (m) return go("lesson", +m[1]);
+    if (["home","lessons","review","steps","ask"].includes(h)) return go(h);
+  } else if (ROLE === "t" && ["t-lessons","t-letters","t-people","t-questions","t-settings"].includes(h)) return go(h);
+  go(fallback);
+}
+window.addEventListener("hashchange", () => { if (ROLE) fromHash(ROLE === "t" ? "t-lessons" : "home"); });
+
+async function copyText(text, btn){
+  let ok = false;
+  try { await navigator.clipboard.writeText(text); ok = true; } catch(e) {}
+  if (!ok) {
+    const ta = document.createElement("textarea"); ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select(); try { ok = document.execCommand("copy"); } catch(e) {} ta.remove();
+  }
+  if (btn) { const o = btn.textContent; btn.textContent = ok ? "コピーしました" : "長押しで選んでコピーしてください"; setTimeout(() => btn.textContent = o, 2000); }
+}
+
+/* ---------- 押したとき ---------- */
+document.addEventListener("click", async e => {
+  const t = e.target.closest("button"); if (!t || t.disabled) return;
+  const ds = t.dataset;
+  try {
+    if (ds.go) { syncDraft(); return go(ds.go); }
+    if (ds.role) { editDraft = null; await enter(ds.role); return; }
+    if (ds.logout !== undefined) return logout(false);
+
+    // はじめの設定
+    if (ds.field) { setupField = ds.field; const keep = ["uCourse","uTeacher","uCode"].map(id => document.getElementById(id).value); go("setup"); ["uCourse","uTeacher","uCode"].forEach((id, i) => document.getElementById(id).value = keep[i]); return; }
+    if (ds.setupsave !== undefined) {
+      const courseName = document.getElementById("uCourse").value.trim(), teacherName = document.getElementById("uTeacher").value.trim(), teacherCode = document.getElementById("uCode").value.trim();
+      if (!courseName) return go("setup", "講座の名前を入れてください");
+      if (teacherCode.length < 6) return go("setup", "講師の合言葉は6字以上にしてください");
+      t.disabled = true;
+      if (MODE === "api") {
+        const r = await api("/api/setup", { method: "POST", body: { courseName, teacherName, field: setupField, teacherCode } }).catch(err => ({ error: err.message }));
+        if (r.error) return go("setup", r.error);
+        TOKEN = r.token; save("tsugi_token", TOKEN); save("tsugi_role", "t"); NEEDS_SETUP = false;
+        setupDone = { memberCode: r.memberCode };
+      } else {
+        demo.courseName = courseName; demo.teacherName = teacherName || "講師"; Object.assign(demo, FIELD_PRESET[setupField]);
+        setupDone = { memberCode: demo.memberCode };
+      }
+      return go("setup");
+    }
+    if (ds.setupnext !== undefined) { setupDone = null; return enter("t"); }
+
+    // 入る
+    if (ds.login1 !== undefined) {
+      loginCode = document.getElementById("lCode").value.trim();
+      if (!loginCode) return go("login", "合言葉を入れてください");
+      t.disabled = true;
+      const r = await api("/api/login", { method: "POST", body: { code: loginCode } }).catch(err => ({ error: err.message }));
+      if (r.error) return go("login", r.error);
+      if (r.need) return go("login-name");
+      TOKEN = r.token; save("tsugi_token", TOKEN); save("tsugi_role", r.role); return enter(r.role);
+    }
+    if (ds.login2 !== undefined) {
+      const name = document.getElementById("lName").value.trim(), pin = document.getElementById("lPin").value.trim();
+      if (!name || !/^\d{4}$/.test(pin)) return go("login-name", "呼び名と、数字4けたの暗証番号を入れてください");
+      t.disabled = true;
+      const r = await api("/api/login", { method: "POST", body: { code: loginCode, name, pin } }).catch(err => ({ error: err.message }));
+      if (r.error) return go("login-name", r.error);
+      TOKEN = r.token; save("tsugi_token", TOKEN); save("tsugi_role", r.role); return enter(r.role);
+    }
+
+    // 参加者
+    if (ds.open) { lessonTab = "text"; go("lesson", +ds.open); return record("review", ds.open); }
+    if (ds.ltab) { lessonTab = ds.ltab; return rerenderKeepScroll(); }
+    if (ds.attend) { await record("attend", ds.attend); return rerenderKeepScroll(); }
+    if (ds.watched) { await record("review", ds.watched); t.textContent = "一画つきました"; t.disabled = true; return; }
+    if (ds.fakeplay) { document.getElementById("audioNote").textContent = "見本のため音声は入っていません。本番では講師本人の録音が流れます。"; return record("listen", ds.fakeplay); }
+    if (ds.q) {
+      const [ln, qi] = ds.q.split("-").map(Number); const L = S.lessons.find(x => x.no === ln);
+      answered[ds.q] = +ds.j;
+      if (L.data.quiz[qi].a === +ds.j) await record("correct", ds.q);
+      return rerenderKeepScroll();
+    }
+    if (ds.retry) { delete answered[ds.retry]; return rerenderKeepScroll(); }
+    if (ds.try) {
+      const text = document.getElementById("tryText").value.trim(), pub = document.getElementById("tryPublic").checked;
+      if (!text) return toast("ひとことを書いてから押してください");
+      t.disabled = true;
+      const item = { lesson: +ds.try, text, public: pub ? 1 : 0, t: Date.now() };
+      if (MODE === "api") { const r = await api("/api/try", { method: "POST", body: { text, public: pub, lesson: +ds.try } }); S.myTries.unshift(item); if (r.added) afterAdded("try", r.t, null); else toast("残しました"); }
+      else { S.myTries.unshift(item); if (!demoDup("try", null)) afterAdded("try", Date.now(), null); else toast("残しました"); }
+      return rerenderKeepScroll();
+    }
+    if (ds.asksend !== undefined) {
+      const text = document.getElementById("askText").value.trim(), box = document.getElementById("askMsg");
+      if (!text) { box.innerHTML = '<p class="muted" style="margin-top:10px">質問を書いてから押してください。</p>'; return; }
+      t.disabled = true;
+      const lno = lastDone() ? lastDone().no : null;
+      if (MODE === "api") { const r = await api("/api/question", { method: "POST", body: { text, lesson: lno } }); if (r.added) afterAdded("ask", r.t, null); }
+      else { demo.questions.push({ id: Date.now(), lesson: lno, text, t: Date.now() }); if (!demoDup("ask", null)) afterAdded("ask", Date.now(), null); }
+      document.getElementById("askText").value = "";
+      box.innerHTML = `<p class="notice" style="margin-top:10px">講師に届きました。${MODE === "demo" ? "（見本なので、この端末の中だけです）" : ""}</p>`;
+      t.disabled = false; return;
+    }
+    if (ds.share !== undefined) {
+      const v = ds.share === "1";
+      if (MODE === "api") await api("/api/me", { method: "POST", body: { showTeacher: v } });
+      S.me.showTeacher = v; S.me.askedShare = true;
+      toast(v ? "講師に足あとを見せます" : "講師には見せません"); return rerenderKeepScroll();
+    }
+
+    // 講師
+    if (ds.tedit) { editDraft = null; return go("t-edit", ds.tedit); }
+    if (ds.copyprompt !== undefined) { syncDraft(); return copyText(PROMPT(TS.courseName, editDraft.no, editDraft.title || "（題）", TS.audience, ngList()), t); }
+    if (ds.parse !== undefined) { syncDraft(); return rerenderKeepScroll(); }
+    if (ds.savelesson !== undefined) {
+      syncDraft(); const e2 = editDraft, msg = document.getElementById("eMsg");
+      const p = parseLessonJSON(e2.json);
+      if (p.error) { msg.innerHTML = `<div class="error">${esc(p.error)}</div>`; return; }
+      if (!e2.title || !e2.date) { msg.innerHTML = `<div class="error">題と日時を入れてください。</div>`; return; }
+      if (e2.isNew && TS.lessons.some(x => x.no === e2.no)) { msg.innerHTML = `<div class="error">第${e2.no}回はもうあります。番号を変えてください。</div>`; return; }
+      if (e2.published && !p.data) { msg.innerHTML = `<div class="error">中身がないと公開できません。Claudeの返事を貼ってください。</div>`; return; }
+      const body = { no: e2.no, title: e2.title, date: e2.date, video: e2.video, data: p.data, published: e2.published };
+      t.disabled = true;
+      if (MODE === "api") await api("/api/t/lesson", { method: "PUT", body });
+      else { const old = demo.lessons.find(x => x.no === e2.no); const nl = { ...body, audio: old ? old.audio : false };
+        demo.lessons = demo.lessons.filter(x => x.no !== e2.no).concat(nl); }
+      await loadTeacher(); editDraft = null; toast(`第${e2.no}回を保存しました`); return go("t-lessons");
+    }
+    if (ds.dellesson !== undefined) {
+      if (t.dataset.sure !== "1") { t.dataset.sure = "1"; t.textContent = "もう一度押すと消えます"; return; }
+      if (MODE === "api") await api("/api/t/lesson/" + editDraft.no, { method: "DELETE" });
+      else demo.lessons = demo.lessons.filter(x => x.no !== editDraft.no);
+      await loadTeacher(); editDraft = null; return go("t-lessons");
+    }
+    if (ds.upaudio !== undefined) {
+      syncDraft(); const f = document.getElementById("eAudio").files[0];
+      if (!f) return toast("音声のファイルを選んでください");
+      if (f.size > 8 * 1024 * 1024) return toast("8MBより大きいファイルです。1分ほどに短くしてください");
+      t.disabled = true; t.textContent = "送っています…";
+      await api("/api/t/audio/" + editDraft.no, { method: "PUT", body: f, headers: { "content-type": f.type || "audio/mpeg" } });
+      editDraft.audio = true; await loadTeacher(); toast("音声を付けました"); return rerenderKeepScroll();
+    }
+    if (ds.delaudio !== undefined) {
+      syncDraft(); await api("/api/t/audio/" + editDraft.no, { method: "DELETE" });
+      editDraft.audio = false; await loadTeacher(); return rerenderKeepScroll();
+    }
+    if (ds.copy) return copyText(document.getElementById(ds.copy).textContent, t);
+    if (ds.answer) {
+      const id = +ds.answer, q = TS.questions.find(x => x.id === id), a = document.getElementById("ans" + id).value.trim();
+      if (!a) return toast("答えを書いてから押してください");
+      if (MODE === "api") await api("/api/t/answer", { method: "POST", body: { qid: id, q: q.text, a, lesson: q.lesson } });
+      else { demo.answers.unshift({ lesson: q.lesson, q: q.text, a, t: Date.now() }); demo.questions = demo.questions.filter(x => x.id !== id); }
+      await loadTeacher(); toast("答えを載せました"); return rerenderKeepScroll();
+    }
+    if (ds.closeq) {
+      if (MODE === "api") await api(`/api/t/question/${ds.closeq}/close`, { method: "POST" });
+      else demo.questions = demo.questions.filter(x => x.id !== +ds.closeq);
+      await loadTeacher(); return rerenderKeepScroll();
+    }
+    if (ds.delans) {
+      if (MODE === "api") await api("/api/t/answer/" + ds.delans, { method: "DELETE" });
+      else demo.answers.splice(+ds.delans - 1, 1);
+      await loadTeacher(); return rerenderKeepScroll();
+    }
+    if (ds.savesettings !== undefined) {
+      const words = {}; Object.keys(WORD_LABEL).forEach(k => words[k] = document.getElementById("w_" + k).value.trim());
+      const courseName = document.getElementById("sCourse").value.trim();
+      const setup = { teacherName: document.getElementById("sTeacher").value.trim(), channel: document.getElementById("sChannel").value.trim(),
+        audience: document.getElementById("sAudience").value.trim(), ngWords: document.getElementById("sNg").value.trim() };
+      if (MODE === "api") await api("/api/t/settings", { method: "PUT", body: { courseName, words, ...setup } });
+      else { if (courseName) demo.courseName = courseName; Object.keys(words).forEach(k => { if (words[k]) demo.words[k] = words[k]; });
+        Object.keys(setup).forEach(k => { if (setup[k] || k === "ngWords") demo[k] = setup[k]; }); }
+      await loadTeacher(); document.getElementById("sMsg").innerHTML = '<p class="notice">保存しました。</p>'; setHeader(); return;
+    }
+    if (ds.changecode !== undefined) {
+      const code = document.getElementById("cTeacher").value.trim(), box = document.getElementById("rMsg");
+      if (code.length < 6) { box.innerHTML = '<div class="error">6字以上にしてください。</div>'; return; }
+      if (MODE === "api") await api("/api/t/codes", { method: "POST", body: { teacherCode: code } });
+      box.innerHTML = '<p class="notice">講師の合言葉を変えました。控えておいてください。</p>'; return;
+    }
+    if (ds.newmember !== undefined) {
+      if (t.dataset.sure !== "1") { t.dataset.sure = "1"; t.textContent = "もう一度押すと作り直します"; return; }
+      if (MODE === "api") await api("/api/t/codes", { method: "POST", body: { newMemberCode: true } });
+      else demo.memberCode = "sanka-" + Math.random().toString(36).slice(2, 8);
+      await loadTeacher(); toast("参加者の合言葉を作り直しました"); return rerenderKeepScroll();
+    }
+    if (ds.demosetup !== undefined) { ROLE = null; setNav(); return go("setup"); }
+    if (ds.resetpin !== undefined) {
+      const name = document.getElementById("rName").value;
+      if (MODE === "api") await api("/api/t/reset-pin", { method: "POST", body: { name } });
+      document.getElementById("rMsg").innerHTML = `<p class="notice">${esc(name)} さんは、次に入るとき新しい番号を決めます。${MODE === "demo" ? "（見本）" : ""}</p>`; return;
+    }
+  } catch(err) { t.disabled = false; toast(esc(err.message || "うまくいきませんでした")); }
+});
+document.addEventListener("change", async e => {
+  if (e.target.id === "shareToggle") {
+    const v = e.target.checked;
+    try { if (MODE === "api") await api("/api/me", { method: "POST", body: { showTeacher: v } }); S.me.showTeacher = v; S.me.askedShare = true; toast(v ? "講師に見せます" : "講師には見せません"); }
+    catch(err) { e.target.checked = !v; toast(esc(err.message)); }
+  }
+});
+document.addEventListener("keydown", e => {
+  if (e.key !== "Enter") return;
+  if (e.target.id === "lCode") document.querySelector("[data-login1]")?.click();
+  if (e.target.id === "lPin") document.querySelector("[data-login2]")?.click();
+});
+
+/* ---------- はじまり ---------- */
+(async () => {
+  MODE = await detect();
+  if (MODE === "api") {
+    try { if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js"); } catch(e) {}
+    if (NEEDS_SETUP) { ROLE = null; setNav(); return go("setup"); }
+    TOKEN = load("tsugi_token", null); const role = load("tsugi_role", null);
+    if (TOKEN && role) { try { await enter(role); return; } catch(e) {} }
+    ROLE = null; setNav();
+    const c = new URLSearchParams(location.search).get("c");
+    if (c) {
+      try { history.replaceState(null, "", location.pathname); } catch(e) {}
+      loginCode = c;
+      const r = await api("/api/login", { method: "POST", body: { code: c } }).catch(err => ({ error: err.message }));
+      if (r.need) return go("login-name");
+      return go("login", "リンクの合言葉が古いようです。講師から届いた合言葉を入れてください");
+    }
+    go("login");
+  } else {
+    demo = makeDemo();
+    if (location.hash === "#setup") { ROLE = null; setNav(); return go("setup"); }
+    await enter(location.hash.startsWith("#t-") ? "t" : "m");
+  }
+})();
+</script>
+</body>
+</html>

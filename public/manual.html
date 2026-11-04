@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>次の回まで 主催者マニュアル</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&family=BIZ+UDPGothic:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* アプリと同じ黒板と白墨。読む書類なので、本文は一段組・行長は短め */
+  --bg:#f3f6f3;
+  --surface:#ffffff;
+  --ink:#1d2f29;
+  --muted:#56675f;
+  --line:#d3dcd6;
+  --board:#22423a;
+  --board-ink:#eef3ea;
+  --chalk:#e8b923;
+  --warn:#a8481f;
+  --font-display:"Klee One","Hiragino Maru Gothic ProN",serif;
+  --font-body:"BIZ UDPGothic","Hiragino Sans","Noto Sans JP",sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#111916;--surface:#18231f;--ink:#e3ebe6;--muted:#9aaba3;--line:#2b3a34;--board:#1f3d35;--chalk:#f0c84a;--warn:#e59a74;color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111916;--surface:#18231f;--ink:#e3ebe6;--muted:#9aaba3;--line:#2b3a34;--board:#1f3d35;--chalk:#f0c84a;--warn:#e59a74;color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:16.5px;line-height:1.85}
+.wrap{max-width:720px;margin:0 auto;padding:0 18px 80px}
+header.cover{background:var(--board);color:var(--board-ink);padding:40px 22px 30px;margin:0 -18px 28px;border-bottom:6px solid rgba(0,0,0,.15)}
+header.cover .kicker{font-size:13px;opacity:.85}
+header.cover h1{font-family:var(--font-display);font-weight:600;font-size:34px;margin:4px 0 6px;line-height:1.3}
+header.cover .line{height:3px;width:80px;background:var(--chalk);border-radius:2px;margin:12px 0}
+header.cover p{margin:0;max-width:34em}
+nav.toc{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px 18px;margin-bottom:28px}
+nav.toc ol{margin:0;padding-left:1.4em;columns:2;column-gap:24px}
+nav.toc li{break-inside:avoid}
+nav.toc a{color:var(--ink)}
+section.ch{margin-top:44px}
+h2{font-family:var(--font-display);font-weight:600;font-size:25px;margin:0 0 12px;display:flex;gap:12px;align-items:baseline;text-wrap:balance}
+h2 .no{font-size:15px;color:var(--board);background:var(--chalk);border-radius:4px;padding:0 8px;font-family:var(--font-body);font-weight:700;flex:none}
+h3{font-size:17px;margin:24px 0 6px}
+p{margin:0 0 12px;max-width:40em}
+a{color:var(--board)}
+:root[data-theme="dark"] a{color:var(--chalk)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) a{color:var(--chalk)}}
+ol.steps{list-style:none;counter-reset:s;padding:0;margin:0 0 14px;display:flex;flex-direction:column;gap:10px}
+ol.steps>li{counter-increment:s;display:grid;grid-template-columns:34px 1fr;gap:10px}
+ol.steps>li::before{content:counter(s);font-family:var(--font-display);font-size:20px;width:30px;height:30px;border-radius:50%;background:var(--board);color:var(--board-ink);display:grid;place-items:center;line-height:1}
+pre,code{font-family:ui-monospace,Menlo,Consolas,monospace}
+pre{background:var(--board);color:var(--board-ink);padding:12px 14px;border-radius:6px;overflow-x:auto;font-size:15px;margin:6px 0 12px}
+code{background:color-mix(in srgb,var(--chalk) 22%,transparent);padding:0 4px;border-radius:3px;font-size:.92em}
+pre code{background:none;padding:0}
+table{width:100%;border-collapse:collapse;margin:8px 0 16px;font-size:15px}
+th,td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left;vertical-align:top}
+th{font-size:13px;color:var(--muted);font-weight:400}
+.tbl{overflow-x:auto}
+.note,.red{border-radius:6px;padding:12px 14px;margin:10px 0 16px;font-size:15.5px}
+.note{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--chalk)}
+.red{background:color-mix(in srgb,var(--warn) 9%,var(--surface));border:1px solid color-mix(in srgb,var(--warn) 35%,transparent);border-left:4px solid var(--warn)}
+.red b:first-child{color:var(--warn)}
+.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:14px 0 18px}
+.flow div{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:10px 6px;text-align:center;font-size:13.5px;line-height:1.5}
+.flow div b{display:block;font-family:var(--font-display);font-size:16px}
+@media (max-width:560px){.flow{grid-template-columns:1fr 1fr}nav.toc ol{columns:1}}
+.handout{background:var(--surface);border:2px dashed var(--line);border-radius:8px;padding:20px;margin-top:14px}
+.handout h3{margin-top:0;font-family:var(--font-display);font-size:21px}
+.blank{display:inline-block;min-width:12em;border-bottom:1px solid var(--ink)}
+footer{margin-top:50px;color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding-top:12px}
+@media print{
+  body{background:#fff;font-size:11pt}
+  header.cover{margin:0 0 16px}
+  nav.toc{display:none}
+  section.ch{break-inside:auto}
+  #furoku-a{break-before:page}
+  pre{white-space:pre-wrap}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="cover">
+  <div class="kicker">講習会・セミナー・勉強会の主催者のための</div>
+  <h1>次の回まで<br>主催者マニュアル</h1>
+  <div class="line"></div>
+  <p>講習の中身をAIで復習用の教材にして、参加者がスマホで見返せるようにするアプリです。次の回まで、学ぶ熱を冷まさないための仕組みが入っています。</p>
+</header>
+
+<nav class="toc" aria-label="目次">
+<ol>
+  <li><a href="#ch1">このアプリでできること</a></li>
+  <li><a href="#ch2">用意するもの</a></li>
+  <li><a href="#ch3">置く（はじめの一回）</a></li>
+  <li><a href="#ch4">はじめの設定</a></li>
+  <li><a href="#ch5">講習ごとの流れ</a></li>
+  <li><a href="#ch6">参加者に案内する</a></li>
+  <li><a href="#ch7">様子と質問を見る</a></li>
+  <li><a href="#ch8">守ってほしいこと</a></li>
+  <li><a href="#ch9">困ったとき</a></li>
+  <li><a href="#ch10">新しい版にする</a></li>
+  <li><a href="#furoku-a">付録　参加者向けの案内</a></li>
+</ol>
+</nav>
+
+<section class="ch" id="ch1">
+<h2><span class="no">1</span>このアプリでできること</h2>
+<div class="flow" aria-label="講習のあとの流れ">
+  <div><b>講習</b>いつもどおり行い、録画かメモを残す</div>
+  <div><b>Claude</b>録画の文字起こしから、復習用の中身を作る</div>
+  <div><b>アプリ</b>貼って直して、公開する</div>
+  <div><b>便り</b>当日夜・3日後・7日後・次回前に送る</div>
+  <div><b>参加者</b>スマホで見返し、足あとを残す</div>
+</div>
+<h3>参加者の画面</h3>
+<ul>
+  <li><b>黒板</b>：次の回まであと何日か、次回までのお題、次の回の準備（3つ）</li>
+  <li><b>回のページ</b>：今日の3つ（要点）、録画、1分のおさらい音声（講師の声）、テキスト、用語集、確認問題、やってみた</li>
+  <li><b>足あと</b>：やったことが一つ増えるたびに、黒板に「正」の字が一画ずつ書き足されます</li>
+  <li><b>質問</b>：名前なしで講師に届き、講師の答えが全員に見えます</li>
+</ul>
+<h3>講師の画面</h3>
+<ul>
+  <li><b>中身</b>：回を足す・直す。Claudeへの頼み文をコピーして、返ってきた文を貼るだけで回のページができます</li>
+  <li><b>便り</b>：参加者に送る文面をアプリが作ります。コピーしてLINEやメールで送ります</li>
+  <li><b>様子</b>：何人がやってみたか、準備がととのったか、しばらく動きのない人が何人か</li>
+  <li><b>質問</b>：届いた質問に答える</li>
+  <li><b>設定</b>：講座の名前、講師のひとこと、使わない言葉など</li>
+</ul>
+<p>アプリはあなた自身のCloudflare（クラウドフレア）のアカウントに、ボタンひとつで置きます。参加者の記録は、あなたのアカウントの中だけに残ります。</p>
+</section>
+
+<section class="ch" id="ch2">
+<h2><span class="no">2</span>用意するもの</h2>
+<div class="tbl"><table>
+<thead><tr><th>もの</th><th>何に使うか</th></tr></thead>
+<tbody>
+<tr><td>Cloudflare のアカウント</td><td>アプリの置き場所。<a href="https://dash.cloudflare.com/sign-up">dash.cloudflare.com</a> で作れます</td></tr>
+<tr><td>GitHub のアカウント</td><td>置くときに、アプリの控えがここに作られます。<a href="https://github.com/signup">github.com</a> で作れます</td></tr>
+<tr><td>Claude などのAI</td><td>講習の文字起こしから、復習用の中身を作る</td></tr>
+<tr><td>YouTube のアカウント</td><td>録画を載せるとき（限定公開で載せます）</td></tr>
+<tr><td>参加者への連絡手段</td><td>LINE、メールなど。便りを送るとき</td></tr>
+</tbody></table></div>
+<p>置くときだけ、パソコンがあると楽です。置いたあとは、スマホだけで使えます。</p>
+<div class="note">料金や無料で使える範囲は、各サービスの公式の案内で確かめてください。画面の名前やボタンの位置も変わることがあります。このマニュアルと違っていたら、公式の案内が正しいです。</div>
+</section>
+
+<section class="ch" id="ch3">
+<h2><span class="no">3</span>置く（はじめの一回）</h2>
+<p>ボタンを押して、画面の案内に沿って進むだけです。文字を打つ窓（ターミナル）は使いません。10分ほど見ておいてください。</p>
+<ol class="steps">
+  <li><div><b>ボタンを押す</b><br><a href="https://deploy.workers.cloudflare.com/?url=https://github.com/yukawa-care/tsugi-no-kai"><span style="display:inline-block;background:#f6821f;color:#fff;font-weight:700;padding:8px 16px;border-radius:6px;margin:6px 0">Deploy to Cloudflare（ここを押す）</span></a><br>
+    <span class="muted" style="font-size:14px">開かないときは、このアドレスを開きます：<br><code style="word-break:break-all">https://deploy.workers.cloudflare.com/?url=https://github.com/yukawa-care/tsugi-no-kai</code></span></div></li>
+  <li><div><b>Cloudflare と GitHub に入る</b><br>Cloudflare に入り、GitHub とつなぐよう言われたら、案内のとおりに許可します。</div></li>
+  <li><div><b>名前を確かめる</b><br>アプリの名前が出ています。そのままでかまいません。講座を二つ以上置くときや、名前を変えたいときは、英小文字・数字・ハイフンで付け直します（例：<code>ai-seminar</code>）。アドレスの一部になります。データベースなどの欄も、出てくるものはそのままでかまいません。</div></li>
+  <li><div><b>置くボタンを押す</b><br>いちばん下の「作成してデプロイ」にあたるボタンを押します。数分待つと、アドレス（<code>https://〜.workers.dev</code>）が出ます。</div></li>
+  <li><div><b>すぐにアドレスを開く</b><br>「はじめの設定」が出ます。次の章へ進みます。</div></li>
+</ol>
+<h3>アドレスに自分の名前を出したくないとき</h3>
+<p>アドレスの <code>〜.workers.dev</code> の前の部分（サブドメイン）は、Cloudflareのアカウントを作ったときに、メールアドレスの名前などから自動で付きます。参加者に見せたくない名前が入っていたら、Cloudflareの「Workers &amp; Pages」の画面で、サブドメインを変えられます（例：<code>ai-seminar.manabi.workers.dev</code>）。変えると、そのアカウントで置いたアプリすべてのアドレスが変わるので、<b>参加者にリンクを送る前に</b>変えておきます。自分のドメイン（例：<code>kouza.example.jp</code>）を持っていれば、それをつなぐこともできます。</p>
+<div class="red"><b>置いたら、すぐ開いてください</b>　最初に「はじめの設定」を済ませた人が講師になります。アドレスを人に教えるのは、設定のあとにします。</div>
+<div class="note">途中で止まったり、赤い文字が出たりしたら、画面の表示をコピーしてClaudeに貼り、「次の回までを置こうとしたらこうなった」と聞いてください。</div>
+<h3>講座を二つ以上置くとき</h3>
+<p>講座ごとに、もう一度ボタンから置きます。名前だけ変えます。</p>
+<details><summary style="cursor:pointer"><b>GitHub を使いたくないとき（パソコンの窓から置く方法）</b></summary>
+<p style="margin-top:10px">Node.js（<a href="https://nodejs.org/">nodejs.org</a> の「LTS」）を入れ、一式の zip を開いたフォルダで窓を開いて、次の一行を打ちます。</p>
+<pre><code>node oku.mjs</code></pre>
+<p><b>Mac</b>：「アプリケーション」→「ユーティリティ」→「ターミナル」を開き、<code>cd </code>（cd と空白一つ）と打ってからフォルダを窓に引っぱって入れ、Enter。<br><b>Windows</b>：フォルダを開き、上の住所の欄に <code>powershell</code> と打って Enter。</p>
+<p>名前を聞かれたら答え、ブラウザが開いたら Cloudflare で許可します。最後に出たアドレスを、すぐに開きます。</p>
+</details>
+</section>
+
+<section class="ch" id="ch4">
+<h2><span class="no">4</span>はじめの設定</h2>
+<p>アドレスを開くと出てきます。答えるのは4つだけです。</p>
+<ol class="steps">
+  <li><div><b>講座の名前</b>　例：はじめてのAI講座</div></li>
+  <li><div><b>講師の呼び名</b>　参加者に出るひとことの「〇〇より」になります</div></li>
+  <li><div><b>どんな分野か</b>　施術・健康／美容・サロン／経営・商い／趣味・習いごと／そのほか。分野に合わせて、Claudeへの頼み方と、気をつける言葉の初めの形が入ります</div></li>
+  <li><div><b>講師の合言葉</b>　自分で決めます（6字以上）。<b>紙などに控えてください</b>。画面には二度と出ません</div></li>
+</ol>
+<p>「はじめる」を押すと、<b>参加者に送るリンク</b>が出ます。このリンクを送れば、参加者は合言葉を打たずに入れます。リンクは、あとからでも「設定」の画面でいつでも見られます。</p>
+<p>これで準備は終わりです。「設定」の画面にはほかの項目もありますが、変えなくても使えます。</p>
+<h3>回を足しておく</h3>
+<p>「中身」→「回を足す」で、第1回の題と日時を入れて保存します。中身はまだ空でかまいません。参加者の黒板に「次の回まで あと〇日」が出るようになります。</p>
+</section>
+
+<section class="ch" id="ch5">
+<h2><span class="no">5</span>講習ごとの流れ</h2>
+<ol class="steps">
+  <li><div><b>講習を録画する</b><br>オンラインなら会議アプリの録画、会場ならスマホの録画や録音で。録れないときは、話したことのメモでもかまいません。</div></li>
+  <li><div><b>文字起こしを用意する</b><br>録画の文字起こし（会議アプリやAIの書き起こし機能など）か、メモを用意します。</div></li>
+  <li><div><b>Claudeで中身を作る</b><br>アプリの「中身」でその回を開き、「頼み文をコピー」を押します。Claudeに貼り、いちばん下の「（ここに貼る）」の所に文字起こしを入れて送ります。</div></li>
+  <li><div><b>貼って読み込む</b><br>Claudeの返事をそのままコピーし、アプリの「Claudeの返事を貼る」の欄に貼って「読み込む」を押します。形がおかしいとき、使わない言葉が入っているとき、「講師確認」が残っているときは、アプリが知らせます。</div></li>
+  <li><div><b>自分で読んで直す</b><br>AIの下書きには、話していないことや言い過ぎが混ざることがあります。<b>必ず自分で読んでから</b>公開します。</div></li>
+  <li><div><b>録画と音声を付ける</b><br>録画はYouTubeに「限定公開」で上げ、アドレスを貼ります。「1分のおさらい」は、スマホのボイスメモなどで<b>自分の声</b>で録って付けます（8MBまで）。</div></li>
+  <li><div><b>公開する</b><br>「参加者に公開する」に印をつけて保存します。講習の日時を過ぎると、参加者の画面で開けるようになります。</div></li>
+  <li><div><b>便りを送る</b><br>「便り」を開くと、送る文面ができています。コピーして、LINEやメールで送ります。予約送信ができる手段なら、まとめて予約しておくと楽です。</div></li>
+</ol>
+<h3>便りを送る日</h3>
+<div class="tbl"><table>
+<thead><tr><th>いつ</th><th>中身</th><th>ねらい</th></tr></thead>
+<tbody>
+<tr><td>講習の当日夜</td><td>今日の3つと、見返す場所</td><td>覚えているうちに一度見返す</td></tr>
+<tr><td>3日後</td><td>確認問題を1問</td><td>忘れかけた頃に思い出す</td></tr>
+<tr><td>7日後</td><td>もう1問と「やってみた？」、お題</td><td>試す後押し</td></tr>
+<tr><td>次回の3日前</td><td>次回の予告とお題</td><td>次も行こうと思える</td></tr>
+<tr><td>動きの少ない週</td><td>講師のひとこと（全員あて）</td><td>責めずに戻るきっかけ</td></tr>
+</tbody></table></div>
+<p>次回の冒頭では、届いた質問に答える時間を少しとると、「送った質問が拾われた」という手応えになります。</p>
+</section>
+
+<section class="ch" id="ch6">
+<h2><span class="no">6</span>参加者に案内する</h2>
+<p>「便り」の画面のいちばん上に、<b>はじめて案内するとき</b>の文面があります。コピーして、LINEやメールで送るだけです。参加用のリンクが入っています。</p>
+<p>参加者はリンクを開き、呼び名と数字4けたの番号を決めて入ります。使い方は、巻末の<a href="#furoku-a">参加者向けの案内</a>を印刷するか、画像にして送ってください。</p>
+<div class="note">参加用のリンクは、参加者にだけ送ります。SNSなど誰でも見られる所には載せません。広まってしまったときは、「設定」→「合言葉と暗証番号」→「参加者の合言葉を作り直す」で古いリンクを使えなくできます（もう入っている人はそのまま使えます）。</div>
+</section>
+
+<section class="ch" id="ch7">
+<h2><span class="no">7</span>様子と質問を見る</h2>
+<h3>様子</h3>
+<p>参加者の数、この1週間でやってみたを残した人数、次の回の準備がととのった人数、7日以上動きのない人数が出ます。名前つきで出るのは、本人が「講師に見せる」を選んだ人だけです。</p>
+<p>動きのない人が多い週は、便りの「動きの少ない週に」の文を<b>全員あて</b>に送ります。名指しで催促はしません。</p>
+<h3>質問</h3>
+<p>質問は名前なしで届きます。答えを書いて「答える」を押すと、参加者全員の質問の画面に出ます。当日に話すつもりの質問は「答えずに閉じる」で片づけられます。</p>
+<h3>参加者が番号を忘れたとき</h3>
+<p>「設定」→「暗証番号の再設定」でその人の呼び名を選びます。その人は次に入るとき、新しい番号を決めます。</p>
+</section>
+
+<section class="ch" id="ch8">
+<h2><span class="no">8</span>守ってほしいこと</h2>
+<div class="red"><b>録画に映る人</b>　参加者の顔・声・名前が映る録画を載せる前に、同意をとってください。映りたくない人がいるときの扱いも、先に決めておきます。</div>
+<div class="red"><b>限定公開</b>　YouTubeの限定公開は、アドレスを知っていれば誰でも見られます。外に出たら困る内容は載せません。</div>
+<div class="red"><b>個人がわかること</b>　お客さま・患者さんなど、講習の外の人の名前、体のこと、写真を、テキスト・録画・質問・やってみたに残しません。入力欄にも注意書きを出していますが、書かれてしまったら講師側で閉じてください。</div>
+<div class="red"><b>講習の中身の権利</b>　ほかの講師の講義や教材を載せるときは、その人の了承を先にとります。</div>
+<div class="red"><b>AIの下書き</b>　AIは、話していないことや言い過ぎを書くことがあります。必ず自分で読んでから公開します。</div>
+<div class="red"><b>医療・健康・お金などの分野</b>　広告や表現に決まりがある分野では、テキストや便りの言い回しにも気をつけてください。判断に迷うときは、所管の役所や専門家に確認してください。</div>
+<div class="red"><b>参加者の記録</b>　参加者の足あと・やってみた・質問は、あなたのCloudflareのアカウントに残ります。何を残し、何に使うかを参加者に伝えてください。</div>
+</section>
+
+<section class="ch" id="ch9">
+<h2><span class="no">9</span>困ったとき</h2>
+<div class="tbl"><table>
+<thead><tr><th>こんなとき</th><th>こうします</th></tr></thead>
+<tbody>
+<tr><td>置く途中で止まった・赤い文字が出た</td><td>画面の表示をコピーしてClaudeに貼り、どうすればよいか聞きます</td></tr>
+<tr><td>講師の合言葉を変えたい</td><td>「設定」→「合言葉と暗証番号」→「講師の合言葉を変える」</td></tr>
+<tr><td>講師の合言葉を忘れて、どの端末からも入れない</td><td>Cloudflareの管理画面で、このアプリのデータベース（D1）を開き、コンソールに <code>DELETE FROM settings WHERE k = 'teacher_hash';</code> と入れて実行します。すぐにアドレスを開くと「はじめの設定」が出るので、合言葉を決め直します。回の中身や参加者の記録は残ります。参加用のリンクは新しくなります</td></tr>
+<tr><td>アドレスに自分のメールの名前が入っている</td><td>第3章「アドレスに自分の名前を出したくないとき」のとおり、サブドメインを変えます。変えたら、参加用リンクを送り直します</td></tr>
+<tr><td>参加者が番号を忘れた</td><td>「設定」→「合言葉と暗証番号」で呼び名を選んで再設定</td></tr>
+<tr><td>参加者が「その呼び名はもう使われている」と言われた</td><td>ほかの人と同じ呼び名です。別の呼び名にしてもらいます</td></tr>
+<tr><td>回が参加者に見えない</td><td>「参加者に公開する」に印があるか、講習の日時を過ぎているかを確かめます</td></tr>
+<tr><td>録画が出ない</td><td>YouTubeのアドレスを貼っているか、公開の設定が「限定公開」か「公開」になっているかを確かめます</td></tr>
+<tr><td>音声が付けられない</td><td>8MBより大きいと付けられません。1分ほどに短くします</td></tr>
+<tr><td>中身を貼ったら「形が読めない」と出た</td><td>Claudeの返事の { から } までが欠けずに貼れているか確かめます。だめなら、Claudeに「JSONだけをもう一度」と頼みます</td></tr>
+</tbody></table></div>
+</section>
+
+<section class="ch" id="ch10">
+<h2><span class="no">10</span>新しい版にする</h2>
+<h3>ボタンで置いた人</h3>
+<ol class="steps">
+  <li><div>新しい一式の zip を開きます。</div></li>
+  <li><div>GitHub で、置いたときに作られた自分のリポジトリを開きます。</div></li>
+  <li><div>「Add file」→「Upload files」で、zip の中の <code>public</code> と <code>src</code> のフォルダを引っぱって入れ、「Commit changes」を押します。<b><code>wrangler.toml</code> は上げ直しません</b>（あなたのアプリの置き場所の情報が入っているため）。</div></li>
+  <li><div>数分で、新しい版に置き直されます。記録と合言葉はそのままです。</div></li>
+</ol>
+<h3>パソコンの窓から置いた人</h3>
+<p>新しい zip を開き、前のフォルダの <code>settei.json</code> を写してから <code>node oku.mjs</code>。<code>settei.json</code> がなければ <code>node oku.mjs アプリの名前</code>。記録と合言葉はそのままです。</p>
+</section>
+
+<section class="ch" id="furoku-a">
+<h2><span class="no">付録</span>参加者向けの案内</h2>
+<p>このまま印刷するか、画像にして参加者に送ってください。</p>
+<div class="handout">
+  <h3>次の回まで　つかいかた</h3>
+  <p>講習のあとの、おさらいの場所です。スマホで見られます。</p>
+  <ol class="steps">
+    <li><div><b>はじめて入る</b><br>講師から届いたリンクを開き、呼び名と、数字4けたの番号を決めます。番号は控えておいてください。別のスマホでも、同じ呼び名と番号で入れます。</div></li>
+    <li><div><b>ホーム画面に置く</b><br>iPhone：Safariの共有ボタン →「ホーム画面に追加」<br>Android：Chromeのメニュー →「ホーム画面に追加」</div></li>
+    <li><div><b>講習のあとに見返す</b><br>「一覧」から回を開くと、今日の3つ・録画・おさらい音声・テキスト・問題があります。</div></li>
+    <li><div><b>試したら一言</b><br>習ったことを試したら、回のページの「やってみた」に一言残します。</div></li>
+    <li><div><b>疑問は質問へ</b><br>「質問」から送ると、名前なしで講師に届きます。</div></li>
+  </ol>
+  <p><b>足あと</b>　見返す・問題に正解する・やってみたを残す、などをするたびに、黒板に「正」の字が一画ずつ書き足されます。毎日でなくて大丈夫。週に一つでも十分です。</p>
+  <p style="margin:0;font-size:14px">お客さま・患者さんなど、個人がわかることは書かないでください。</p>
+</div>
+</section>
+
+<footer>次の回まで　主催者マニュアル（2026年11月版）</footer>
+</div>
+</body>
+</html>
